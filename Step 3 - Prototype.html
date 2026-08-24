@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Прототип · ЕАЕ:Платформа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+
+<style>
+  html, body, #root { height: 100%; }
+  body { overflow: hidden; }
+  #root { display: flex; flex-direction: column; }
+
+  /* Animations */
+  @keyframes fadeIn   { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalIn  { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes toastIn  { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes ddIn     { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Prototype hint bar */
+  .hint-bar {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--ink-900); color: var(--ink-000);
+    padding: 8px 16px; border-radius: var(--r-pill);
+    font-size: 12px; font-family: var(--font-mono);
+    box-shadow: var(--shadow-lg); z-index: 200;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 90vw;
+  }
+  .hint-bar b { color: #fff; font-family: var(--font-sans); font-weight: 600; }
+  .hint-bar kbd {
+    background: rgba(255,255,255,.12); padding: 2px 6px; border-radius: 3px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .hint-bar__close {
+    background: transparent; border: none; color: var(--ink-400);
+    cursor: pointer; padding: 0 4px; font-size: 16px; line-height: 1;
+  }
+
+  /* Scrollbar softer */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--ink-050); }
+  ::-webkit-scrollbar-thumb { background: var(--ink-300); border-radius: 5px; border: 2px solid var(--ink-050); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-400); }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="app/Icons.jsx"></script>
+<script type="text/babel" src="app/mock.jsx"></script>
+<script type="text/babel" src="app/Overlays.jsx"></script>
+<script type="text/babel" src="app/Charts.jsx"></script>
+<script type="text/babel" src="app/Shell.jsx"></script>
+<script type="text/babel" src="app/pages/CRUDCommon.jsx"></script>
+<script type="text/babel" src="app/pages/Blocks.jsx"></script>
+<script type="text/babel" src="app/pages/Protocols.jsx"></script>
+<script type="text/babel" src="app/pages/Telemetry.jsx"></script>
+<script type="text/babel" src="app/pages/PagesList.jsx"></script>
+<script type="text/babel" src="app/pages/Dashboard.jsx"></script>
+<script type="text/babel" src="app/App.jsx"></script>
+
+<script type="text/babel">
+  // Init hash if empty
+  if (!location.hash) location.hash = '#/dashboard';
+  mount();
+</script>
+
+</body>
+</html>

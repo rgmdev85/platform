@@ -1,0 +1,175 @@
+/* ==========================================================================
+   ЕАЕ:Платформа — Design Tokens
+   Единый источник правды для цвета, типографики, отступов, теней, радиусов.
+   Все компоненты UI Kit ссылаются исключительно на эти CSS custom properties.
+   ========================================================================== */
+
+:root {
+  /* ---------- BRAND ---------- */
+  --eae-red:            #EC0033;
+  --eae-red-hover:      #C4002B;
+  --eae-red-active:     #A00023;
+  --eae-red-soft:       #FFF0F3;   /* Фон для brand-alert, красных плашек */
+
+  /* ---------- INK (нейтральные) ---------- */
+  --ink-000:            #FFFFFF;
+  --ink-050:            #F5F7FA;   /* Фон рабочей области */
+  --ink-100:            #EAEEF2;   /* Zebra-полосы, row-hover, разделы */
+  --ink-200:            #D8DEE5;   /* Границы карточек, таблиц, инпутов */
+  --ink-300:            #B6BEC8;   /* Отключённые границы, PY-серии IBCS */
+  --ink-400:            #8A96A3;   /* Placeholder, вторичные метки, Plan */
+  --ink-500:            #5F6D7C;   /* Muted text, метаданные */
+  --ink-600:            #455260;   /* Основной body-текст (WCAG AA 8.4:1) */
+  --ink-700:            #2B3843;   /* Тёмный текст, ссылки в hover */
+  --ink-800:            #1B2530;   /* Заголовки, критический текст */
+  --ink-900:            #0F1720;   /* KPI-числа, максимальный контраст */
+  --ink-sidebar:        #222D31;   /* Сохранённый цвет сайдбара из легаси */
+  --ink-sidebar-hover:  #2E3A40;
+  --ink-sidebar-active: #37444B;
+
+  /* ---------- SEMANTIC ---------- */
+  --success:            #2E8540;
+  --success-soft:       #E7F3EA;
+  --success-hover:      #256B33;
+  --warning:            #B26A00;
+  --warning-soft:       #FFF3E0;
+  --warning-hover:      #8F5500;
+  --danger:             #C0392B;
+  --danger-soft:        #FDEBE7;
+  --danger-hover:       #9E2E22;
+  --info:               #1F6FEB;
+  --info-soft:          #E7EEFD;
+  --info-hover:         #1858C2;
+
+  /* ---------- IBCS DATA-VIZ ---------- */
+  --data-actual:        #111111;
+  --data-plan:          #8A96A3;    /* used as контур */
+  --data-py:            #B6BEC8;    /* previous year */
+  --data-forecast:      #5F6D7C;    /* штриховкой */
+  --data-variance-pos:  #2E8540;
+  --data-variance-neg:  #C0392B;
+  --data-variance-neu:  #8A96A3;
+
+  /* Дополнительные категорийные серии (когда IBCS-нотация не применима) */
+  --data-cat-1:         #1F6FEB;
+  --data-cat-2:         #B26A00;
+  --data-cat-3:         #2E8540;
+  --data-cat-4:         #6F42C1;
+  --data-cat-5:         #C0392B;
+  --data-cat-6:         #17828A;
+
+  /* Легенда графиков из легаси: КЗТК, КЗ², КЗ', Факт, ПБР */
+  --line-kztk:          #1F6FEB;   /* синий */
+  --line-kz2:           #17828A;   /* teal  */
+  --line-kzs:           #B26A00;   /* охра  */
+  --line-fact:          #C0392B;   /* красный факт */
+  --line-plan:          #8A96A3;   /* серый план */
+
+  /* ---------- TYPOGRAPHY ---------- */
+  --font-sans:          'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono:          'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+  --fs-11:              11px;
+  --fs-12:              12px;
+  --fs-13:              13px;
+  --fs-14:              14px;
+  --fs-15:              15px;
+  --fs-16:              16px;
+  --fs-18:              18px;
+  --fs-22:              22px;
+  --fs-28:              28px;
+  --fs-36:              36px;
+  --fs-48:              48px;
+
+  --lh-tight:           1.15;
+  --lh-snug:            1.35;
+  --lh-normal:          1.55;
+
+  --fw-regular:         400;
+  --fw-medium:          500;
+  --fw-semibold:        600;
+  --fw-bold:            700;
+
+  --ls-tight:           -0.01em;
+  --ls-caps:            0.06em;
+
+  /* ---------- SPACING (4/8 grid) ---------- */
+  --sp-1:               4px;
+  --sp-2:               8px;
+  --sp-3:               12px;
+  --sp-4:               16px;
+  --sp-5:               20px;
+  --sp-6:               24px;
+  --sp-8:               32px;
+  --sp-10:              40px;
+  --sp-12:              48px;
+  --sp-16:              64px;
+  --sp-20:              80px;
+
+  /* ---------- RADII ---------- */
+  --r-xs:               2px;   /* internal, dividers */
+  --r-sm:               4px;   /* buttons, chips, inputs */
+  --r-md:               6px;   /* cards, dropdowns */
+  --r-lg:               8px;   /* modals, big cards */
+  --r-pill:             999px;
+
+  /* ---------- SHADOWS (сдержанные, промышленные) ---------- */
+  --shadow-xs:          0 1px 2px rgba(15,23,32,.06);
+  --shadow-sm:          0 2px 4px rgba(15,23,32,.06), 0 1px 2px rgba(15,23,32,.08);
+  --shadow-md:          0 4px 12px rgba(15,23,32,.08), 0 2px 4px rgba(15,23,32,.06);
+  --shadow-lg:          0 8px 24px rgba(15,23,32,.12), 0 4px 8px rgba(15,23,32,.08);
+  --shadow-focus:       0 0 0 3px rgba(31,111,235,.24);
+  --shadow-focus-danger:0 0 0 3px rgba(192,57,43,.24);
+
+  /* ---------- LAYOUT ---------- */
+  --topbar-h:           56px;
+  --sidebar-w:          232px;
+  --sidebar-w-collapsed:56px;
+  --container-max:      1600px;
+
+  /* ---------- Z-INDEX ---------- */
+  --z-sidebar:          40;
+  --z-topbar:           50;
+  --z-dropdown:         60;
+  --z-modal-backdrop:   70;
+  --z-modal:            80;
+  --z-toast:            90;
+  --z-tooltip:          100;
+
+  /* ---------- MOTION ---------- */
+  --dur-fast:           120ms;
+  --dur-base:           180ms;
+  --dur-slow:           240ms;
+  --easing:             cubic-bezier(.2,.7,.2,1);
+}
+
+/* ==========================================================================
+   Base reset
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+  color: var(--ink-700);
+  background: var(--ink-050);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--info); text-decoration: none; }
+a:hover { color: var(--info-hover); text-decoration: underline; }
+
+/* Tabular numbers everywhere numeric */
+.num, .tabular, [data-numeric], td.num, th.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Focus ring for accessibility */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--r-sm);
+}

@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Шаг 2 · UI Kit — ЕАЕ:Платформа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* ==== showroom-only styles ==== */
+  body { background: var(--ink-050); }
+
+  .kit-shell { display: flex; min-height: 100vh; }
+  .kit-toc {
+    position: sticky; top: 0; align-self: flex-start;
+    width: 240px; height: 100vh; overflow-y: auto;
+    background: var(--ink-000); border-right: 1px solid var(--ink-200);
+    padding: var(--sp-5) var(--sp-4);
+    flex-shrink: 0;
+  }
+  .kit-toc__brand {
+    display: flex; align-items: center; gap: var(--sp-2);
+    padding-bottom: var(--sp-4); margin-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--ink-200);
+  }
+  .kit-toc__brand img { width: 28px; height: 28px; }
+  .kit-toc__brand b { font-size: var(--fs-14); color: var(--ink-900); display: block; }
+  .kit-toc__brand span { font-size: var(--fs-11); color: var(--ink-500); text-transform: uppercase; letter-spacing: .06em; }
+  .kit-toc__title { font-size: var(--fs-11); font-weight: var(--fw-semibold); color: var(--ink-500); text-transform: uppercase; letter-spacing: .06em; margin: var(--sp-4) 0 var(--sp-2); }
+  .kit-toc__link {
+    display: block; padding: 6px 8px; border-radius: var(--r-sm);
+    color: var(--ink-600); text-decoration: none; font-size: var(--fs-13);
+  }
+  .kit-toc__link:hover { background: var(--ink-100); color: var(--ink-900); text-decoration: none; }
+
+  .kit-main { flex: 1; padding: var(--sp-8) var(--sp-10); max-width: 1200px; }
+  @media (max-width:1200px){ .kit-main { padding: var(--sp-6); } }
+
+  .kit-header { margin-bottom: var(--sp-8); }
+  .kit-header .eyebrow { margin-bottom: 6px; display: block; }
+  .kit-header h1 { font-size: 32px; font-weight: 700; margin: 0 0 8px; color: var(--ink-900); letter-spacing: -0.01em; }
+  .kit-header p { color: var(--ink-500); font-size: 15px; max-width: 720px; margin: 0; }
+
+  .kit-section { margin-bottom: var(--sp-12); scroll-margin-top: var(--sp-6); }
+  .kit-section__title {
+    display: flex; align-items: baseline; gap: var(--sp-3);
+    font-size: 20px; font-weight: 700; color: var(--ink-900);
+    margin: 0 0 4px; padding-bottom: var(--sp-2);
+    border-bottom: 2px solid var(--ink-200);
+  }
+  .kit-section__title .num { font-family: var(--font-mono); font-size: 12px; color: var(--eae-red); font-weight: 500; }
+  .kit-section__lede { color: var(--ink-500); font-size: 14px; margin: 0 0 var(--sp-5); max-width: 640px; }
+
+  .kit-sub { font-size: 13px; font-weight: var(--fw-semibold); color: var(--ink-500); text-transform: uppercase; letter-spacing: .05em; margin: var(--sp-6) 0 var(--sp-3); }
+
+  .grid { display: grid; gap: var(--sp-3); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width:1000px){ .grid-4 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: 1fr 1fr; } }
+
+  /* Component demo tile */
+  .demo {
+    background: var(--ink-000);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: var(--sp-5);
+  }
+  .demo__label {
+    font-size: var(--fs-11); font-weight: var(--fw-semibold); color: var(--ink-500);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: var(--sp-3);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .demo__stage {
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--sp-5) var(--sp-3);
+    background: var(--ink-050);
+    border-radius: var(--r-sm);
+    min-height: 80px;
+    gap: var(--sp-3); flex-wrap: wrap;
+  }
+  .demo__stage--vertical { flex-direction: column; align-items: stretch; }
+  .demo__caption { font-size: var(--fs-12); color: var(--ink-500); margin-top: var(--sp-2); font-family: var(--font-mono); }
+
+  /* Swatch (like Step 1 but compact) */
+  .swatch { border: 1px solid var(--ink-200); border-radius: var(--r-sm); overflow: hidden; background: var(--ink-000); }
+  .swatch__chip { height: 60px; }
+  .swatch__body { padding: 8px 10px; }
+  .swatch__label { font-size: var(--fs-12); font-weight: var(--fw-semibold); color: var(--ink-800); }
+  .swatch__hex { font-size: 11px; font-family: var(--font-mono); color: var(--ink-500); margin-top: 2px; }
+  .swatch__tok { font-size: 11px; font-family: var(--font-mono); color: var(--ink-400); margin-top: 4px; }
+
+  .grid-swatch { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sp-2); }
+  @media (max-width:900px){ .grid-swatch { grid-template-columns: repeat(3, 1fr); } }
+
+  /* Spacing scale demo */
+  .space-row { display: grid; grid-template-columns: 60px 60px 1fr; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--ink-100); font-size: 12px; }
+  .space-row:last-child { border-bottom: none; }
+  .space-row .tok { font-family: var(--font-mono); color: var(--ink-700); }
+  .space-row .val { font-family: var(--font-mono); color: var(--ink-500); }
+  .space-row .bar { height: 12px; background: var(--info); border-radius: 2px; }
+
+  /* Chart placeholder wrappers */
+  .chart {
+    background: var(--ink-000);
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: var(--sp-4) var(--sp-5);
+  }
+  .chart__head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--sp-3); }
+  .chart__title { font-weight: var(--fw-semibold); font-size: var(--fs-14); color: var(--ink-900); }
+  .chart__subtitle { font-size: var(--fs-12); color: var(--ink-500); margin-top: 2px; font-family: var(--font-mono); }
+  .chart__legend { display: flex; gap: var(--sp-3); font-size: var(--fs-12); align-items: center; }
+  .chart__legend span { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-600); }
+  .chart__legend i { display: inline-block; width: 16px; height: 10px; border-radius: 1px; }
+
+  /* IBCS bars (horizontal comparison) */
+  .ibcs-bars { display: flex; flex-direction: column; gap: 4px; }
+  .ibcs-row { display: grid; grid-template-columns: 90px 1fr 70px 70px; gap: 12px; align-items: center; padding: 4px 0; font-size: var(--fs-12); }
+  .ibcs-row .lbl { color: var(--ink-700); }
+  .ibcs-track { position: relative; height: 20px; }
+  .ibcs-plan { position: absolute; top: 0; left: 0; height: 100%; border: 1.5px solid var(--data-plan); border-radius: 1px; box-sizing: border-box; }
+  .ibcs-actual { position: absolute; top: 4px; left: 0; height: 12px; background: var(--data-actual); }
+  .ibcs-py { position: absolute; top: 0; left: 0; height: 100%; background: var(--data-py); opacity: .6; }
+  .ibcs-val { font-family: var(--font-mono); text-align: right; color: var(--ink-900); font-variant-numeric: tabular-nums; }
+  .ibcs-var { font-family: var(--font-mono); font-weight: var(--fw-semibold); text-align: right; font-variant-numeric: tabular-nums; }
+  .ibcs-var.pos { color: var(--data-variance-pos); }
+  .ibcs-var.neg { color: var(--data-variance-neg); }
+  .ibcs-var.neu { color: var(--data-variance-neu); }
+
+  /* Waterfall */
+  .wf { position: relative; height: 200px; padding: 12px 0; display: flex; align-items: flex-end; gap: 16px; }
+  .wf__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .wf__bar { width: 60%; min-height: 4px; border-radius: 1px; position: relative; }
+  .wf__bar--start { background: var(--data-actual); }
+  .wf__bar--pos { background: var(--data-variance-pos); }
+  .wf__bar--neg { background: var(--data-variance-neg); }
+  .wf__bar--end { background: var(--data-actual); }
+  .wf__label { font-size: 11px; color: var(--ink-600); text-align: center; }
+  .wf__val { font-family: var(--font-mono); font-size: 11px; color: var(--ink-800); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+  .wf__baseline { position: absolute; left: 0; right: 0; bottom: 12px; height: 1px; background: var(--ink-300); }
+
+  /* Sparkline demo (SVG inline) */
+  .spark { width: 100%; height: 32px; overflow: visible; }
+  .spark path { fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+  /* Small-multiples grid */
+  .sm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-3); }
+  @media (max-width:800px){ .sm-grid { grid-template-columns: 1fr 1fr; } }
+  .sm-card { border: 1px solid var(--ink-200); border-radius: var(--r-sm); padding: 12px; background: var(--ink-000); }
+  .sm-card__head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .sm-card__title { font-size: 12px; font-weight: var(--fw-semibold); color: var(--ink-800); }
+  .sm-card__var { font-family: var(--font-mono); font-size: 11px; font-weight: var(--fw-semibold); }
+</style>
+</head>
+<body>
+
+<div class="kit-shell">
+
+  <!-- ============ TABLE OF CONTENTS ============ -->
+  <nav class="kit-toc">
+    <div class="kit-toc__brand">
+      <img src="brand/eae_logo.png" alt="ЕАЕ"/>
+      <div>
+        <b>UI Kit</b>
+        <span>шаг 2 / 4</span>
+      </div>
+    </div>
+    <div class="kit-toc__title">Foundations</div>
+    <a href="#colors"      class="kit-toc__link">Цвета</a>
+    <a href="#typography"  class="kit-toc__link">Типографика</a>
+    <a href="#spacing"     class="kit-toc__link">Отступы и радиусы</a>
+    <a href="#shadows"     class="kit-toc__link">Тени и elevation</a>
+
+    <div class="kit-toc__title">Elements</div>
+    <a href="#buttons"     class="kit-toc__link">Кнопки</a>
+    <a href="#inputs"      class="kit-toc__link">Поля ввода</a>
+    <a href="#selects"     class="kit-toc__link">Селекты и checkbox/radio</a>
+    <a href="#badges"      class="kit-toc__link">Бейджи, теги, чипы</a>
+    <a href="#alerts"      class="kit-toc__link">Алерты, тоасты, тултипы</a>
+
+    <div class="kit-toc__title">Layout</div>
+    <a href="#navigation"  class="kit-toc__link">Sidebar, Topbar</a>
+    <a href="#breadcrumbs" class="kit-toc__link">Breadcrumbs, Tabs</a>
+    <a href="#cards"       class="kit-toc__link">Cards, KPI</a>
+    <a href="#modals"      class="kit-toc__link">Модалки, дровер</a>
+
+    <div class="kit-toc__title">Data</div>
+    <a href="#tables"      class="kit-toc__link">Таблицы</a>
+    <a href="#pagination"  class="kit-toc__link">Пагинация</a>
+    <a href="#filters"     class="kit-toc__link">Фильтр-бар</a>
+    <a href="#states"      class="kit-toc__link">Loading / Empty / Error</a>
+
+    <div class="kit-toc__title">Data-viz (IBCS)</div>
+    <a href="#kpi"         class="kit-toc__link">KPI карточки</a>
+    <a href="#ibcs"        class="kit-toc__link">Actual vs Plan</a>
+    <a href="#variance"    class="kit-toc__link">Variance chart</a>
+    <a href="#waterfall"   class="kit-toc__link">Waterfall</a>
+    <a href="#smallmult"   class="kit-toc__link">Small multiples</a>
+    <a href="#trend"       class="kit-toc__link">Тренд + прогноз</a>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="kit-main">
+
+    <header class="kit-header">
+      <span class="eyebrow">Шаг 2 из 4</span>
+      <h1>UI Kit — компоненты и токены</h1>
+      <p>Полный набор production-ready компонентов на CSS-переменных из <code>tokens.css</code>. Все состояния показаны в одном документе, готово к переиспользованию в React-компонентах на Шаге 4.</p>
+    </header>
+
+    <!-- ============ COLORS ============ -->
+    <section id="colors" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.1</span> Цветовые токены</h2>
+      <p class="kit-section__lede">Один brand-акцент (красный ЕАЕ), нейтральная шкала для интерфейса, семантические цвета для статусов и отдельная IBCS-палитра для визуализации данных.</p>
+
+      <div class="kit-sub">Brand</div>
+      <div class="grid-swatch">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--eae-red)"></div><div class="swatch__body"><div class="swatch__label">EAE Red</div><div class="swatch__hex">#EC0033</div><div class="swatch__tok">--eae-red</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--eae-red-hover)"></div><div class="swatch__body"><div class="swatch__label">Red Hover</div><div class="swatch__hex">#C4002B</div><div class="swatch__tok">--eae-red-hover</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--eae-red-active)"></div><div class="swatch__body"><div class="swatch__label">Red Active</div><div class="swatch__hex">#A00023</div><div class="swatch__tok">--eae-red-active</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--eae-red-soft)"></div><div class="swatch__body"><div class="swatch__label">Red Soft</div><div class="swatch__hex">#FFF0F3</div><div class="swatch__tok">--eae-red-soft</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-sidebar)"></div><div class="swatch__body"><div class="swatch__label">Sidebar</div><div class="swatch__hex">#222D31</div><div class="swatch__tok">--ink-sidebar</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-000);border:1px solid var(--ink-200)"></div><div class="swatch__body"><div class="swatch__label">Paper</div><div class="swatch__hex">#FFFFFF</div><div class="swatch__tok">--ink-000</div></div></div>
+      </div>
+
+      <div class="kit-sub">Ink (нейтральная шкала)</div>
+      <div class="grid-swatch">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-050)"></div><div class="swatch__body"><div class="swatch__label">ink-050</div><div class="swatch__hex">#F5F7FA</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-100)"></div><div class="swatch__body"><div class="swatch__label">ink-100</div><div class="swatch__hex">#EAEEF2</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-200)"></div><div class="swatch__body"><div class="swatch__label">ink-200</div><div class="swatch__hex">#D8DEE5</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-300)"></div><div class="swatch__body"><div class="swatch__label">ink-300</div><div class="swatch__hex">#B6BEC8</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-400)"></div><div class="swatch__body"><div class="swatch__label">ink-400</div><div class="swatch__hex">#8A96A3</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-500)"></div><div class="swatch__body"><div class="swatch__label">ink-500</div><div class="swatch__hex">#5F6D7C</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-600)"></div><div class="swatch__body"><div class="swatch__label">ink-600</div><div class="swatch__hex">#455260</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-700)"></div><div class="swatch__body"><div class="swatch__label">ink-700</div><div class="swatch__hex">#2B3843</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-800)"></div><div class="swatch__body"><div class="swatch__label">ink-800</div><div class="swatch__hex">#1B2530</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--ink-900)"></div><div class="swatch__body"><div class="swatch__label">ink-900</div><div class="swatch__hex">#0F1720</div></div></div>
+      </div>
+
+      <div class="kit-sub">Semantic (сдержанные, WCAG AA)</div>
+      <div class="grid-swatch">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--success)"></div><div class="swatch__body"><div class="swatch__label">Success</div><div class="swatch__hex">#2E8540</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--warning)"></div><div class="swatch__body"><div class="swatch__label">Warning</div><div class="swatch__hex">#B26A00</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--danger)"></div><div class="swatch__body"><div class="swatch__label">Danger</div><div class="swatch__hex">#C0392B</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--info)"></div><div class="swatch__body"><div class="swatch__label">Info</div><div class="swatch__hex">#1F6FEB</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--success-soft)"></div><div class="swatch__body"><div class="swatch__label">Success soft</div><div class="swatch__hex">#E7F3EA</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--info-soft)"></div><div class="swatch__body"><div class="swatch__label">Info soft</div><div class="swatch__hex">#E7EEFD</div></div></div>
+      </div>
+
+      <div class="kit-sub">IBCS Data-viz</div>
+      <div class="grid-swatch">
+        <div class="swatch"><div class="swatch__chip" style="background:var(--data-actual)"></div><div class="swatch__body"><div class="swatch__label">Actual / Факт</div><div class="swatch__hex">#111111</div><div class="swatch__tok">заливка</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:transparent;border:3px solid var(--data-plan)"></div><div class="swatch__body"><div class="swatch__label">Plan / ПБР</div><div class="swatch__hex">контур #8A96A3</div><div class="swatch__tok">контур</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--data-py)"></div><div class="swatch__body"><div class="swatch__label">Previous Year</div><div class="swatch__hex">#B6BEC8</div><div class="swatch__tok">заливка</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:repeating-linear-gradient(45deg,var(--data-forecast) 0 3px,transparent 3px 6px)"></div><div class="swatch__body"><div class="swatch__label">Forecast</div><div class="swatch__hex">#5F6D7C</div><div class="swatch__tok">штриховка</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--data-variance-pos)"></div><div class="swatch__body"><div class="swatch__label">Variance +</div><div class="swatch__hex">#2E8540</div></div></div>
+        <div class="swatch"><div class="swatch__chip" style="background:var(--data-variance-neg)"></div><div class="swatch__body"><div class="swatch__label">Variance −</div><div class="swatch__hex">#C0392B</div></div></div>
+      </div>
+    </section>
+
+    <!-- ============ TYPOGRAPHY ============ -->
+    <section id="typography" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.2</span> Типографика</h2>
+      <p class="kit-section__lede">Inter — интерфейс, JetBrains Mono — числа, даты и коды. Числа всегда с <code>font-variant-numeric: tabular-nums</code>.</p>
+
+      <div class="demo">
+        <div class="h-display" style="margin-bottom:8px">Управление телеизмерениями</div>
+        <div class="caption mono">.h-display · 36 / 700 / tight</div>
+        <hr class="divider"/>
+        <div class="h-1">Блок_1 — Сводка по ПБР за 24.08.2026</div>
+        <div class="caption mono" style="margin-top:6px">.h-1 · 28 / 700</div>
+        <hr class="divider"/>
+        <div class="h-2">Трёхминутная выработка</div>
+        <div class="caption mono" style="margin-top:6px">.h-2 · 22 / 700</div>
+        <hr class="divider"/>
+        <div class="h-3">Добавить протокол</div>
+        <div class="caption mono" style="margin-top:6px">.h-3 · 18 / 600</div>
+        <hr class="divider"/>
+        <div class="h-4">Адрес станции</div>
+        <div class="caption mono" style="margin-top:6px">.h-4 · 16 / 600</div>
+        <hr class="divider"/>
+        <p class="body-lg" style="margin:0">Выгрузка сформирована 2026-08-24 10:06:03 по дате 2026-08-24. Значения телеизмерений в норме.</p>
+        <div class="caption mono" style="margin-top:6px">.body-lg · 15 / 400 / 1.55</div>
+        <hr class="divider"/>
+        <p class="body" style="margin:0">Значения ПБР для блока 1 находятся в диапазоне 80–164 МВт, отклонения не зафиксированы. Тип сигнала: Float, код качества 1.</p>
+        <div class="caption mono" style="margin-top:6px">.body · 14 / 400 / 1.55 · основной размер интерфейса</div>
+        <hr class="divider"/>
+        <div class="metric">62.28<span class="metric__unit">°C</span></div>
+        <div class="caption mono" style="margin-top:8px">.metric · 36 / 700 · tabular-nums · для KPI на дашборде</div>
+        <hr class="divider"/>
+        <div class="eyebrow">Стандарт протокола</div>
+        <div class="caption mono" style="margin-top:6px">.eyebrow · 11 / 600 / uppercase / +6% letter-spacing</div>
+        <hr class="divider"/>
+        <div class="mono" style="font-size:13px">2026-08-24 10:06:03 · 201071 · +12.4% · Float</div>
+        <div class="caption mono" style="margin-top:6px">.mono · JetBrains Mono · для дат / ID / чисел в таблицах</div>
+      </div>
+    </section>
+
+    <!-- ============ SPACING ============ -->
+    <section id="spacing" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.3</span> Отступы, сетка и радиусы</h2>
+      <p class="kit-section__lede">Шкала 4/8 pixels — все отступы кратны 4px. Максимальная ширина контейнера — 1600px, breakpoints для desktop / laptop / tablet.</p>
+
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Spacing scale · <span class="mono">--sp-*</span></div>
+          <div class="space-row"><span class="tok">--sp-1</span><span class="val">4px</span><div class="bar" style="width:4px"></div></div>
+          <div class="space-row"><span class="tok">--sp-2</span><span class="val">8px</span><div class="bar" style="width:8px"></div></div>
+          <div class="space-row"><span class="tok">--sp-3</span><span class="val">12px</span><div class="bar" style="width:12px"></div></div>
+          <div class="space-row"><span class="tok">--sp-4</span><span class="val">16px</span><div class="bar" style="width:16px"></div></div>
+          <div class="space-row"><span class="tok">--sp-5</span><span class="val">20px</span><div class="bar" style="width:20px"></div></div>
+          <div class="space-row"><span class="tok">--sp-6</span><span class="val">24px</span><div class="bar" style="width:24px"></div></div>
+          <div class="space-row"><span class="tok">--sp-8</span><span class="val">32px</span><div class="bar" style="width:32px"></div></div>
+          <div class="space-row"><span class="tok">--sp-10</span><span class="val">40px</span><div class="bar" style="width:40px"></div></div>
+          <div class="space-row"><span class="tok">--sp-12</span><span class="val">48px</span><div class="bar" style="width:48px"></div></div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Radii · <span class="mono">--r-*</span></div>
+          <div class="demo__stage" style="gap:20px;padding:20px">
+            <div style="width:56px;height:56px;background:var(--info);border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px">2</div>
+            <div style="width:56px;height:56px;background:var(--info);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px">4</div>
+            <div style="width:56px;height:56px;background:var(--info);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px">6</div>
+            <div style="width:56px;height:56px;background:var(--info);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px">8</div>
+            <div style="width:56px;height:56px;background:var(--info);border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-mono);font-size:11px">pill</div>
+          </div>
+
+          <div class="demo__label" style="margin-top:24px">Breakpoints</div>
+          <div class="space-row"><span class="tok">desktop</span><span class="val">≥ 1440</span><div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-600)">основная целевая</div></div>
+          <div class="space-row"><span class="tok">laptop</span><span class="val">1280</span><div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-600)">адаптация сайдбара</div></div>
+          <div class="space-row"><span class="tok">tablet</span><span class="val">768</span><div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-600)">только просмотр</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SHADOWS ============ -->
+    <section id="shadows" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.4</span> Тени и elevation</h2>
+      <p class="kit-section__lede">Тени сдержанные, промышленные — никаких мягких «облаков». Только для модалок, dropdown'ов и hover-подсветки.</p>
+      <div class="grid grid-4">
+        <div class="demo">
+          <div class="demo__label">--shadow-xs</div>
+          <div class="demo__stage" style="background:transparent"><div style="width:100px;height:60px;background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-xs)"></div></div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">--shadow-sm</div>
+          <div class="demo__stage" style="background:transparent"><div style="width:100px;height:60px;background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-sm)"></div></div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">--shadow-md · dropdown</div>
+          <div class="demo__stage" style="background:transparent"><div style="width:100px;height:60px;background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-md)"></div></div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">--shadow-lg · modal</div>
+          <div class="demo__stage" style="background:transparent"><div style="width:100px;height:60px;background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-lg)"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BUTTONS ============ -->
+    <section id="buttons" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.5</span> Кнопки</h2>
+      <p class="kit-section__lede">4 варианта × 3 размера × 6 состояний. Primary — тёмная (нейтральная), brand — красная (только для ключевых brand-действий типа «Создать блок»).</p>
+
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Primary (default action)</div>
+          <div class="demo__stage">
+            <button class="btn btn--primary">Сохранить</button>
+            <button class="btn btn--primary">Сохранить</button>
+            <button class="btn btn--primary" disabled>Сохранить</button>
+            <button class="btn btn--primary btn--loading">Сохранить</button>
+          </div>
+          <div class="demo__caption">default · hover · disabled · loading</div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Brand (акцентная, redкая)</div>
+          <div class="demo__stage">
+            <button class="btn btn--brand">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Создать блок
+            </button>
+            <button class="btn btn--brand btn--lg">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Создать протокол
+            </button>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Secondary</div>
+          <div class="demo__stage">
+            <button class="btn btn--secondary">Отменить</button>
+            <button class="btn btn--secondary">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+              Назад
+            </button>
+            <button class="btn btn--secondary" disabled>Экспорт</button>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Ghost / Icon</div>
+          <div class="demo__stage">
+            <button class="btn btn--ghost">Отмена</button>
+            <button class="btn btn--ghost btn--icon" aria-label="settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+            <button class="btn btn--ghost btn--icon btn--sm" aria-label="delete"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Semantic</div>
+          <div class="demo__stage">
+            <button class="btn btn--success">
+              <svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Показать данные
+            </button>
+            <button class="btn btn--danger">Удалить блок</button>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Sizes</div>
+          <div class="demo__stage">
+            <button class="btn btn--primary btn--sm">Small · 28</button>
+            <button class="btn btn--primary">Medium · 36</button>
+            <button class="btn btn--primary btn--lg">Large · 44</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INPUTS ============ -->
+    <section id="inputs" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.6</span> Поля ввода</h2>
+
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Text input · states</div>
+          <div class="demo__stage demo__stage--vertical">
+            <div class="form-group">
+              <label class="form-label">Имя протокола для ТМ <span class="form-label__required">*</span></label>
+              <input class="input" placeholder="Например: МЭК-104 — Блок 1"/>
+              <div class="form-help">Уникальное имя, используется в списке протоколов.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">IP сервера</label>
+              <input class="input" value="10.77.116.165"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Адрес порта</label>
+              <input class="input input--error" value="65539"/>
+              <div class="form-error">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Значение вне диапазона 1–65535.
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Резервный IP <span class="form-label__hint">опционально</span></label>
+              <input class="input" disabled value="10.77.116.166"/>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Search · with icon</div>
+          <div class="demo__stage demo__stage--vertical">
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="input" placeholder="Поиск по телеизмерениям · Ctrl+K"/>
+            </div>
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <input class="input" value="2026-08-24"/>
+            </div>
+            <textarea class="textarea" placeholder="Комментарий к блоку (опционально)…"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SELECTS ============ -->
+    <section id="selects" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.7</span> Селекты, чекбоксы, радио, тумблеры</h2>
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Select</div>
+          <div class="demo__stage demo__stage--vertical">
+            <div class="form-group">
+              <label class="form-label">Стандарт протокола</label>
+              <select class="select">
+                <option>МЭК-104</option>
+                <option>Modbus RTU</option>
+                <option>Modbus TCP/IP</option>
+                <option>OPC UA</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Тип сигнала</label>
+              <select class="select" disabled>
+                <option>Float</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Checkbox · Radio · Toggle</div>
+          <div class="demo__stage demo__stage--vertical">
+            <label class="check"><input type="checkbox" checked/> Использовать типовые параметры</label>
+            <label class="check"><input type="checkbox"/> Автоматически создать телесигнал</label>
+            <label class="check"><input type="checkbox" disabled/> Логирование отключено (недоступно)</label>
+            <hr class="divider"/>
+            <label class="radio"><input type="radio" name="proto" checked/> МЭК-104</label>
+            <label class="radio"><input type="radio" name="proto"/> Modbus TCP</label>
+            <label class="radio"><input type="radio" name="proto"/> OPC UA</label>
+            <hr class="divider"/>
+            <label class="toggle"><input type="checkbox" checked/><span class="toggle__track"></span> Показать отклонения на графике</label>
+            <label class="toggle"><input type="checkbox"/><span class="toggle__track"></span> Автообновление каждые 5 сек</label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BADGES ============ -->
+    <section id="badges" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.8</span> Бейджи, теги, чипы фильтров</h2>
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Badges · статусы</div>
+          <div class="demo__stage">
+            <span class="badge badge--success badge--dot">В норме</span>
+            <span class="badge badge--warning badge--dot">Внимание</span>
+            <span class="badge badge--danger badge--dot">Авария</span>
+            <span class="badge badge--info">Modbus TCP</span>
+            <span class="badge badge--neutral">Float</span>
+            <span class="badge badge--brand">ПБР</span>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Filter chips · Tableau-style</div>
+          <div class="demo__stage">
+            <span class="chip chip--active">
+              <span class="chip__label">Блок:</span>
+              <span class="chip__value">Блок_1</span>
+              <button class="chip__close">×</button>
+            </span>
+            <span class="chip chip--active">
+              <span class="chip__label">Тип:</span>
+              <span class="chip__value">Float</span>
+              <button class="chip__close">×</button>
+            </span>
+            <span class="chip">
+              <span class="chip__label">+ добавить фильтр</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ALERTS ============ -->
+    <section id="alerts" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.9</span> Алерты, тоасты, тултипы</h2>
+
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Alerts (inline)</div>
+          <div class="demo__stage demo__stage--vertical" style="align-items:stretch">
+            <div class="alert alert--success">
+              <svg class="alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <div>
+                <div class="alert__title">Протокол сохранён</div>
+                <div class="alert__body">МЭК-104-1 добавлен в список активных протоколов.</div>
+              </div>
+              <button class="alert__close">×</button>
+            </div>
+            <div class="alert alert--warning">
+              <svg class="alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div>
+                <div class="alert__title">Задержка приёма данных</div>
+                <div class="alert__body">Последнее обновление: 3 мин 12 сек назад. Проверьте соединение с 10.77.116.02.</div>
+              </div>
+            </div>
+            <div class="alert alert--danger">
+              <svg class="alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div>
+                <div class="alert__title">Отклонение от ПБР &gt; 5%</div>
+                <div class="alert__body">Блок_1: фактическая мощность 172.4 МВт при плане 164.0 МВт.</div>
+              </div>
+            </div>
+            <div class="alert alert--info">
+              <svg class="alert__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <div>
+                <div class="alert__body">Выгрузка сформирована 2026-08-24 10:06:03 по дате 2026-08-24.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Toast + Tooltip</div>
+          <div class="demo__stage demo__stage--vertical" style="align-items:stretch;gap:24px">
+            <div class="toast toast--success">
+              <svg class="toast__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <div class="toast__body">
+                <div class="toast__title">Телеизмерение удалено</div>
+                <div class="toast__desc">элемент 232-Q (Блок_2) убран из списка.</div>
+              </div>
+              <button class="toast__action">Отменить</button>
+            </div>
+            <div style="position:relative;padding:40px 0;display:flex;justify-content:center">
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-500);border-bottom:1px dashed var(--ink-400);padding:0 4px;cursor:help">10:32:14 · 164.2 МВт</span>
+              <div class="tooltip tooltip--rich" style="position:absolute;top:0;left:50%;transform:translateX(-50%)">
+                <div style="font-weight:600;margin-bottom:6px">Блок_1 · 10:32:14</div>
+                <div class="tooltip__row"><span>Факт</span><span style="color:#fff">164.2 МВт</span></div>
+                <div class="tooltip__row"><span>ПБР</span><span style="color:#fff">159.1 МВт</span></div>
+                <div class="tooltip__row"><span>Отклонение</span><span style="color:#6FD180">▲ +3.2%</span></div>
+                <div class="tooltip__row"><span>Качество</span><span style="color:#fff">1</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NAVIGATION ============ -->
+    <section id="navigation" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.10</span> Sidebar &amp; Topbar</h2>
+      <p class="kit-section__lede">Сайдбар из легаси сохраняем (тёмный <code>#222D31</code>). Топбар модернизируем: убираем яркий красный, оставляем узкую акцентную полосу и добавляем глобальный поиск.</p>
+
+      <div class="demo">
+        <div class="demo__label">Sidebar (расширенный)</div>
+        <div class="demo__stage" style="background:transparent;padding:0;justify-content:flex-start;align-items:stretch;min-height:auto">
+          <div style="width:100%;display:flex;height:520px;border:1px solid var(--ink-200);border-radius:var(--r-md);overflow:hidden">
+            <aside class="sidebar">
+              <div class="sidebar__brand">
+                <img src="brand/eae_logo.png" alt="ЕАЕ"/>
+                <div>ЕАЕ:Платформа</div>
+              </div>
+              <div class="sidebar__nav">
+                <div class="sidebar__group">
+                  <div class="sidebar__group-title">Мониторинг</div>
+                  <a class="sidebar__item sidebar__item--active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Страница 1
+                  </a>
+                  <a class="sidebar__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
+                    Схемы
+                  </a>
+                </div>
+                <div class="sidebar__group">
+                  <div class="sidebar__group-title">Администрирование</div>
+                  <a class="sidebar__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M3 12h18"/></svg>
+                    Управление страницами
+                  </a>
+                  <a class="sidebar__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    Блоки
+                  </a>
+                  <a class="sidebar__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Протоколы
+                  </a>
+                  <a class="sidebar__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    Телеизмерения
+                  </a>
+                </div>
+              </div>
+              <div class="sidebar__footer">v.4.2.0 · build 2026.08</div>
+            </aside>
+            <div style="flex:1;background:var(--ink-050);display:flex;align-items:center;justify-content:center;color:var(--ink-400);font-family:var(--font-mono);font-size:12px">← сайдбар с группировкой пунктов</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo" style="margin-top:16px">
+        <div class="demo__label">Topbar</div>
+        <div class="demo__stage" style="background:transparent;padding:0;justify-content:stretch;align-items:stretch;min-height:auto">
+          <div style="width:100%;border:1px solid var(--ink-200);border-radius:var(--r-md);overflow:hidden">
+            <header class="topbar" style="border-bottom:1px solid var(--ink-200)">
+              <div class="topbar__left">
+                <button class="btn btn--ghost btn--icon btn--sm" aria-label="collapse">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <nav class="crumbs">
+                  <a>Home</a>
+                  <span class="crumbs__sep">/</span>
+                  <a>Администрирование</a>
+                  <span class="crumbs__sep">/</span>
+                  <span class="current">Управление телеизмерениями</span>
+                </nav>
+              </div>
+              <div class="topbar__search">
+                <div class="input-wrap">
+                  <svg class="input-wrap__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input class="input" placeholder="Поиск по всей системе · Ctrl+K"/>
+                </div>
+              </div>
+              <div class="topbar__right">
+                <button class="btn btn--ghost btn--icon btn--sm notif-btn" aria-label="notifications">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  <span class="notif-btn__dot"></span>
+                </button>
+                <button class="btn btn--ghost btn--icon btn--sm" aria-label="settings">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <div class="divider--v"></div>
+                <div class="topbar__user">
+                  <div class="topbar__avatar">ПП</div>
+                  <div>
+                    <div class="topbar__user-name">Пётр Петрович</div>
+                    <div class="topbar__user-role">Администратор</div>
+                  </div>
+                </div>
+              </div>
+            </header>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BREADCRUMBS + TABS ============ -->
+    <section id="breadcrumbs" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.11</span> Хлебные крошки и вкладки</h2>
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Breadcrumbs</div>
+          <div class="demo__stage" style="justify-content:flex-start">
+            <nav class="crumbs">
+              <a>Home</a>
+              <span class="crumbs__sep">/</span>
+              <a>Страница 1</a>
+              <span class="crumbs__sep">/</span>
+              <span class="current">Блок_1</span>
+            </nav>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Tabs</div>
+          <div class="demo__stage" style="justify-content:flex-start;padding:0">
+            <div class="tabs" style="width:100%;padding:0 12px">
+              <button class="tab tab--active">Приём данных</button>
+              <button class="tab">Телесигнализация <span class="badge badge--danger">3</span></button>
+              <button class="tab">Телесигналы</button>
+              <button class="tab">Блоки</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CARDS ============ -->
+    <section id="cards" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.12</span> Карточки и KPI</h2>
+      <div class="grid grid-2">
+        <div class="demo">
+          <div class="demo__label">Card · content</div>
+          <div class="demo__stage" style="align-items:stretch;padding:0;background:transparent">
+            <div class="card" style="width:100%">
+              <div class="card__header">
+                <div>
+                  <div class="card__title">Блок_1 · Сводка ПБР</div>
+                  <div class="card__subtitle">обновлено 10:06:03 · Modbus TCP</div>
+                </div>
+                <div style="display:flex;gap:8px">
+                  <button class="btn btn--secondary btn--sm">Экспорт</button>
+                  <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+                </div>
+              </div>
+              <div class="card__body body">
+                Тип сигнала: <b>Float</b> · Код качества: <b>1</b> · Диапазон значений: 80–164 МВт.
+              </div>
+              <div class="card__footer body-sm muted">Виджет №1 из 3</div>
+            </div>
+          </div>
+        </div>
+        <div class="demo" id="kpi">
+          <div class="demo__label">KPI cards · с variance</div>
+          <div class="demo__stage" style="align-items:stretch;padding:0;background:transparent;gap:12px">
+            <div class="kpi" style="flex:1">
+              <div class="kpi__label">Температура блока</div>
+              <div class="kpi__value">62.28<span class="kpi__unit">°C</span></div>
+              <div class="kpi__delta kpi__delta--pos">▲ +1.4 °C · vs час назад</div>
+              <svg class="kpi__spark" viewBox="0 0 100 24" preserveAspectRatio="none" style="color:var(--info)">
+                <path d="M0 18 L10 16 L20 17 L30 14 L40 12 L50 15 L60 10 L70 8 L80 9 L90 6 L100 4"/>
+              </svg>
+            </div>
+            <div class="kpi" style="flex:1">
+              <div class="kpi__label">Отклонений от ПБР</div>
+              <div class="kpi__value">3<span class="kpi__unit">шт</span></div>
+              <div class="kpi__delta kpi__delta--neg">▲ +2 · за смену</div>
+              <svg class="kpi__spark" viewBox="0 0 100 24" preserveAspectRatio="none" style="color:var(--danger)">
+                <path d="M0 20 L10 20 L20 18 L30 20 L40 16 L50 12 L60 14 L70 10 L80 8 L90 12 L100 6"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MODALS ============ -->
+    <section id="modals" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.13</span> Модалка (диалог)</h2>
+      <div class="demo">
+        <div class="demo__label">Confirm delete</div>
+        <div class="demo__stage" style="background:linear-gradient(0deg,rgba(15,23,32,.35),rgba(15,23,32,.35)),var(--ink-050);padding:32px;align-items:flex-start">
+          <div class="modal" style="max-width:440px">
+            <div class="modal__header">
+              <div>
+                <div class="modal__title">Удалить телеизмерение?</div>
+                <div class="modal__desc">Элемент <b class="mono" style="color:var(--ink-900)">232-Q · Блок_2</b> будет безвозвратно удалён. Все связанные исторические записи сохранятся в архиве.</div>
+              </div>
+              <button class="modal__close">×</button>
+            </div>
+            <div class="modal__body">
+              <label class="check"><input type="checkbox"/> Я понимаю, что действие необратимо</label>
+            </div>
+            <div class="modal__footer">
+              <button class="btn btn--ghost">Отмена</button>
+              <button class="btn btn--danger">Удалить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TABLES ============ -->
+    <section id="tables" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.14</span> Таблицы данных</h2>
+      <p class="kit-section__lede">Ключевой компонент системы. Числа моноширинные с tabular-nums, правое выравнивание, hover на строке, sortable-заголовки, row-actions справа.</p>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:32px"><label class="check"><input type="checkbox"/></label></th>
+              <th class="sortable sorted">Время прихода сигнала <span class="sort-icon">↓</span></th>
+              <th class="sortable">Блок / Схема</th>
+              <th class="sortable">Имя</th>
+              <th class="sortable">Тип сигнала</th>
+              <th class="sortable num">Код качества</th>
+              <th class="num">Последнее значение</th>
+              <th style="text-align:right">Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><label class="check"><input type="checkbox"/></label></td>
+              <td class="mono">2026-08-24 09:59:16</td>
+              <td>Блок_1</td>
+              <td>b1-температура</td>
+              <td><span class="badge badge--neutral">Float</span></td>
+              <td class="num">1</td>
+              <td class="num">62.28</td>
+              <td class="actions">
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg></button>
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+              </td>
+            </tr>
+            <tr class="selected">
+              <td><label class="check"><input type="checkbox" checked/></label></td>
+              <td class="mono">2026-08-24 09:58:20</td>
+              <td>Блок_2</td>
+              <td>B2-температура</td>
+              <td><span class="badge badge--neutral">Float</span></td>
+              <td class="num">1</td>
+              <td class="num">54.10</td>
+              <td class="actions">
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button>
+              </td>
+            </tr>
+            <tr>
+              <td><label class="check"><input type="checkbox"/></label></td>
+              <td class="mono">2026-08-24 09:57:12</td>
+              <td>Блок_3</td>
+              <td>b3-generation</td>
+              <td><span class="badge badge--neutral">Float</span></td>
+              <td class="num">1</td>
+              <td class="num">142.10</td>
+              <td class="actions">
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button>
+              </td>
+            </tr>
+            <tr>
+              <td><label class="check"><input type="checkbox"/></label></td>
+              <td class="mono">2026-08-24 09:56:03</td>
+              <td>Блок_1</td>
+              <td>элемент 135-Q</td>
+              <td><span class="badge badge--neutral">Float</span></td>
+              <td class="num" style="color:var(--danger);font-weight:600">0</td>
+              <td class="num">—</td>
+              <td class="actions">
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button>
+              </td>
+            </tr>
+            <tr>
+              <td><label class="check"><input type="checkbox"/></label></td>
+              <td class="mono">2026-08-24 09:54:45</td>
+              <td>Блок_4</td>
+              <td>b4-temperature</td>
+              <td><span class="badge badge--neutral">Float</span></td>
+              <td class="num">1</td>
+              <td class="num">73.42</td>
+              <td class="actions">
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="btn btn--ghost btn--icon btn--sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/></svg></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ PAGINATION ============ -->
+    <section id="pagination" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.15</span> Пагинация</h2>
+      <div class="demo">
+        <div class="demo__stage">
+          <div class="pager">
+            <button class="pager__btn" disabled>‹</button>
+            <button class="pager__btn pager__btn--active">1</button>
+            <button class="pager__btn">2</button>
+            <button class="pager__btn">3</button>
+            <button class="pager__btn">…</button>
+            <button class="pager__btn">42</button>
+            <button class="pager__btn">›</button>
+            <span class="pager__info">Строк: 1–50 из 2 087</span>
+            <select class="select" style="width:80px;height:30px"><option>50</option><option>100</option><option>200</option></select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FILTERS ============ -->
+    <section id="filters" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.16</span> Фильтр-бар (Tableau-style)</h2>
+      <div class="demo">
+        <div class="demo__stage" style="align-items:stretch;padding:0;background:transparent">
+          <div class="filter-bar" style="width:100%">
+            <span class="filter-bar__label">Фильтры</span>
+            <span class="chip chip--active"><span class="chip__label">Блок:</span><span class="chip__value">Блок_1, Блок_2</span><button class="chip__close">×</button></span>
+            <span class="chip chip--active"><span class="chip__label">Дата:</span><span class="chip__value">2026-08-24</span><button class="chip__close">×</button></span>
+            <span class="chip chip--active"><span class="chip__label">Тип:</span><span class="chip__value">Float</span><button class="chip__close">×</button></span>
+            <span class="chip"><span class="chip__label">+ фильтр</span></span>
+            <button class="filter-bar__clear">Сбросить всё</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STATES ============ -->
+    <section id="states" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.17</span> Loading / Empty / Error</h2>
+      <div class="grid grid-3">
+        <div class="demo">
+          <div class="demo__label">Loading skeleton</div>
+          <div class="demo__stage" style="align-items:stretch;padding:16px;background:transparent">
+            <div style="width:100%">
+              <div class="skeleton skeleton--line" style="width:60%"></div>
+              <div class="skeleton skeleton--line" style="width:100%"></div>
+              <div class="skeleton skeleton--line" style="width:90%"></div>
+              <div class="skeleton skeleton--line" style="width:80%;height:20px;margin-top:14px"></div>
+            </div>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Empty state</div>
+          <div class="state" style="padding:24px 12px;min-height:auto">
+            <svg class="state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <div class="state__title">Нет телеизмерений</div>
+            <p class="state__body">Создайте первое поле измерения для блока или подключите протокол.</p>
+            <button class="btn btn--brand btn--sm">+ Создать поле</button>
+          </div>
+        </div>
+        <div class="demo">
+          <div class="demo__label">Error state</div>
+          <div class="state" style="padding:24px 12px;min-height:auto">
+            <svg class="state__icon" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div class="state__title" style="color:var(--danger)">Не удалось загрузить данные</div>
+            <p class="state__body">Проверьте соединение с сервером 10.77.116.02 или обратитесь к администратору.</p>
+            <button class="btn btn--secondary btn--sm">Повторить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ IBCS ============ -->
+    <section id="ibcs" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.18</span> IBCS bar chart — Actual vs Plan</h2>
+      <p class="kit-section__lede">Чёрный факт поверх серого контура плана. Отклонения показываются <b>только при превышении порога ±3%</b>. Всё в моноширинных цифрах, справа значение и дельта.</p>
+
+      <div class="chart">
+        <div class="chart__head">
+          <div>
+            <div class="chart__title">Мощность блоков ГОУ на 10:00, МВт</div>
+            <div class="chart__subtitle">факт vs ПБР · 24.08.2026 · 4 блока</div>
+          </div>
+          <div class="chart__legend">
+            <span><i style="background:var(--data-actual)"></i>Факт</span>
+            <span><i style="border:1.5px solid var(--data-plan);background:transparent"></i>ПБР</span>
+          </div>
+        </div>
+        <div class="ibcs-bars">
+          <div class="ibcs-row"><span class="lbl">Блок_1</span>
+            <div class="ibcs-track"><div class="ibcs-plan" style="width:78%"></div><div class="ibcs-actual" style="width:82%"></div></div>
+            <span class="ibcs-val">164.2</span><span class="ibcs-var pos">▲ +5.1</span>
+          </div>
+          <div class="ibcs-row"><span class="lbl">Блок_2</span>
+            <div class="ibcs-track"><div class="ibcs-plan" style="width:65%"></div><div class="ibcs-actual" style="width:62%"></div></div>
+            <span class="ibcs-val">124.0</span><span class="ibcs-var neg">▼ −4.6</span>
+          </div>
+          <div class="ibcs-row"><span class="lbl">Блок_3</span>
+            <div class="ibcs-track"><div class="ibcs-plan" style="width:70%"></div><div class="ibcs-actual" style="width:71%"></div></div>
+            <span class="ibcs-val">142.1</span><span class="ibcs-var neu">▬ +0.7</span>
+          </div>
+          <div class="ibcs-row"><span class="lbl">Блок_4</span>
+            <div class="ibcs-track"><div class="ibcs-plan" style="width:88%"></div><div class="ibcs-actual" style="width:96%"></div></div>
+            <span class="ibcs-val">192.0</span><span class="ibcs-var pos">▲ +9.1</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VARIANCE COLUMN CHART ============ -->
+    <section id="variance" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.19</span> Variance column chart (Zebra BI-style)</h2>
+      <p class="kit-section__lede">Колонки отклонений по часам — знак и цвет только у самой дельты, не у абсолютного значения.</p>
+
+      <div class="chart">
+        <div class="chart__head">
+          <div>
+            <div class="chart__title">Блок_1 · Отклонение от ПБР по часам, МВт</div>
+            <div class="chart__subtitle">24.08.2026 · 00:00 — 23:00 · порог ±5.0 МВт</div>
+          </div>
+        </div>
+        <svg viewBox="0 0 480 180" style="width:100%;height:200px" preserveAspectRatio="xMidYMid meet">
+          <!-- baseline -->
+          <line x1="0" y1="90" x2="480" y2="90" stroke="#0F1720" stroke-width="1"/>
+          <line x1="0" y1="60" x2="480" y2="60" stroke="#EAEEF2" stroke-dasharray="2 3"/>
+          <line x1="0" y1="120" x2="480" y2="120" stroke="#EAEEF2" stroke-dasharray="2 3"/>
+          <text x="4" y="58" font-family="JetBrains Mono" font-size="9" fill="#8A96A3">+8</text>
+          <text x="4" y="128" font-family="JetBrains Mono" font-size="9" fill="#8A96A3">−8</text>
+          <!-- bars: 24 columns, values -->
+          <script/>
+          <!-- Values by hour: mostly small, spikes at 09-11 and 22 -->
+          <g>
+            <!-- helper: bar centered on baseline y=90 -->
+            <!-- hour 0..23, x from 20 -->
+            <!-- positive up, negative down. width=14, gap=6 -->
+            <!-- generated inline -->
+            <rect x="20"  y="88"  width="14" height="2"  fill="#8A96A3"/>
+            <rect x="40"  y="86"  width="14" height="4"  fill="#8A96A3"/>
+            <rect x="60"  y="84"  width="14" height="6"  fill="#8A96A3"/>
+            <rect x="80"  y="88"  width="14" height="2"  fill="#8A96A3"/>
+            <rect x="100" y="90"  width="14" height="3"  fill="#8A96A3"/>
+            <rect x="120" y="90"  width="14" height="4"  fill="#8A96A3"/>
+            <rect x="140" y="86"  width="14" height="4"  fill="#8A96A3"/>
+            <rect x="160" y="82"  width="14" height="8"  fill="#8A96A3"/>
+            <rect x="180" y="76"  width="14" height="14" fill="#8A96A3"/>
+            <rect x="200" y="64"  width="14" height="26" fill="#2E8540"/>
+            <rect x="220" y="60"  width="14" height="30" fill="#2E8540"/>
+            <rect x="240" y="70"  width="14" height="20" fill="#2E8540"/>
+            <rect x="260" y="82"  width="14" height="8"  fill="#8A96A3"/>
+            <rect x="280" y="90"  width="14" height="8"  fill="#8A96A3"/>
+            <rect x="300" y="90"  width="14" height="12" fill="#8A96A3"/>
+            <rect x="320" y="90"  width="14" height="16" fill="#8A96A3"/>
+            <rect x="340" y="90"  width="14" height="6"  fill="#8A96A3"/>
+            <rect x="360" y="88"  width="14" height="2"  fill="#8A96A3"/>
+            <rect x="380" y="86"  width="14" height="4"  fill="#8A96A3"/>
+            <rect x="400" y="82"  width="14" height="8"  fill="#8A96A3"/>
+            <rect x="420" y="90"  width="14" height="24" fill="#C0392B"/>
+            <rect x="440" y="90"  width="14" height="14" fill="#8A96A3"/>
+            <rect x="460" y="90"  width="14" height="4"  fill="#8A96A3"/>
+          </g>
+          <!-- hour ticks -->
+          <g font-family="JetBrains Mono" font-size="8" fill="#8A96A3">
+            <text x="27"  y="145" text-anchor="middle">00</text>
+            <text x="107" y="145" text-anchor="middle">04</text>
+            <text x="187" y="145" text-anchor="middle">08</text>
+            <text x="267" y="145" text-anchor="middle">12</text>
+            <text x="347" y="145" text-anchor="middle">16</text>
+            <text x="427" y="145" text-anchor="middle">20</text>
+            <text x="470" y="145" text-anchor="middle">23</text>
+          </g>
+          <!-- annotations -->
+          <text x="220" y="55" font-family="Inter" font-size="10" fill="#2E8540" font-weight="600">пик +7.5</text>
+          <text x="415" y="120" font-family="Inter" font-size="10" fill="#C0392B" font-weight="600">−6.1</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ============ WATERFALL ============ -->
+    <section id="waterfall" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.20</span> Waterfall (движение показателя)</h2>
+      <div class="chart">
+        <div class="chart__head">
+          <div>
+            <div class="chart__title">Суммарная выработка ГОУ, МВт · декомпозиция изменений</div>
+            <div class="chart__subtitle">24.08.2026 vs 23.08.2026</div>
+          </div>
+        </div>
+        <div class="wf">
+          <div class="wf__baseline"></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--start" style="height:140px"></div><div class="wf__val">612.4</div><div class="wf__label">Вчера</div></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--pos"   style="height:22px;margin-bottom:140px"></div><div class="wf__val" style="color:var(--data-variance-pos)">+18.2</div><div class="wf__label">Блок_1</div></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--neg"   style="height:14px;margin-top:158px"></div><div class="wf__val" style="color:var(--data-variance-neg)">−9.4</div><div class="wf__label">Блок_2</div></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--pos"   style="height:8px;margin-bottom:148px"></div><div class="wf__val" style="color:var(--data-variance-pos)">+4.1</div><div class="wf__label">Блок_3</div></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--pos"   style="height:26px;margin-bottom:152px"></div><div class="wf__val" style="color:var(--data-variance-pos)">+22.7</div><div class="wf__label">Блок_4</div></div>
+          <div class="wf__col"><div class="wf__bar wf__bar--end"   style="height:170px"></div><div class="wf__val">648.0</div><div class="wf__label">Сегодня</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SMALL MULTIPLES ============ -->
+    <section id="smallmult" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.21</span> Small multiples</h2>
+      <p class="kit-section__lede">Единый масштаб оси Y во всех мини-графиках — базовое правило IBCS-сравнения.</p>
+
+      <div class="sm-grid">
+        <!-- 6 blocks -->
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_1</div><div class="sm-card__var" style="color:var(--data-variance-pos)">+3.1%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 30 L20 28 L40 25 L60 15 L80 12 L100 10" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 30 L20 27 L40 22 L60 20 L80 18 L100 16" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_2</div><div class="sm-card__var" style="color:var(--data-variance-neg)">−3.6%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 26 L20 27 L40 26 L60 28 L80 30 L100 32" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 22 L20 22 L40 22 L60 22 L80 22 L100 22" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_3</div><div class="sm-card__var" style="color:var(--data-variance-neu)">+0.5%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 25 L20 24 L40 25 L60 24 L80 23 L100 23" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 25 L20 25 L40 25 L60 25 L80 25 L100 25" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_4</div><div class="sm-card__var" style="color:var(--data-variance-pos)">+5.1%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 28 L20 24 L40 20 L60 14 L80 10 L100 6" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 26 L20 22 L40 18 L60 16 L80 14 L100 12" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_5</div><div class="sm-card__var" style="color:var(--data-variance-neu)">−0.8%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 20 L20 22 L40 20 L60 22 L80 20 L100 22" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 20 L20 20 L40 20 L60 20 L80 20 L100 20" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+        <div class="sm-card"><div class="sm-card__head"><div class="sm-card__title">Блок_6</div><div class="sm-card__var" style="color:var(--data-variance-neg)">−4.2%</div></div>
+          <svg viewBox="0 0 100 40" style="width:100%;height:44px" preserveAspectRatio="none">
+            <path d="M0 22 L20 24 L40 28 L60 30 L80 32 L100 34" fill="none" stroke="var(--data-actual)" stroke-width="1.5"/>
+            <path d="M0 20 L20 20 L40 20 L60 20 L80 20 L100 20" fill="none" stroke="var(--data-plan)" stroke-width="1.2" stroke-dasharray="2 2"/>
+          </svg></div>
+      </div>
+    </section>
+
+    <!-- ============ TREND + FORECAST ============ -->
+    <section id="trend" class="kit-section">
+      <h2 class="kit-section__title"><span class="num">2.22</span> Тренд + прогноз (forecast штриховкой)</h2>
+      <div class="chart">
+        <div class="chart__head">
+          <div>
+            <div class="chart__title">Блок_1 · Мощность, МВт · 24 часа</div>
+            <div class="chart__subtitle">факт 00:00–14:00 · прогноз 14:00–23:59</div>
+          </div>
+          <div class="chart__legend">
+            <span><i style="background:var(--data-actual)"></i>Факт</span>
+            <span><i style="background:repeating-linear-gradient(45deg,var(--data-forecast) 0 2px,transparent 2px 4px)"></i>Прогноз</span>
+            <span><i style="border:1.5px dashed var(--data-plan);background:transparent"></i>ПБР</span>
+          </div>
+        </div>
+        <svg viewBox="0 0 480 180" style="width:100%;height:220px" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="3" height="6" fill="#5F6D7C" opacity=".7"/>
+            </pattern>
+          </defs>
+          <!-- gridlines -->
+          <line x1="30" y1="30" x2="470" y2="30" stroke="#EAEEF2"/>
+          <line x1="30" y1="70" x2="470" y2="70" stroke="#EAEEF2"/>
+          <line x1="30" y1="110" x2="470" y2="110" stroke="#EAEEF2"/>
+          <line x1="30" y1="150" x2="470" y2="150" stroke="#EAEEF2"/>
+          <text x="24" y="34" font-family="JetBrains Mono" font-size="9" fill="#8A96A3" text-anchor="end">200</text>
+          <text x="24" y="74" font-family="JetBrains Mono" font-size="9" fill="#8A96A3" text-anchor="end">150</text>
+          <text x="24" y="114" font-family="JetBrains Mono" font-size="9" fill="#8A96A3" text-anchor="end">100</text>
+          <text x="24" y="154" font-family="JetBrains Mono" font-size="9" fill="#8A96A3" text-anchor="end">50</text>
+
+          <!-- plan (dashed) -->
+          <polyline points="30,140 100,140 130,120 180,60 250,60 320,60 400,60 470,90 470,90"
+                    fill="none" stroke="#8A96A3" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+          <!-- actual (0-14h = x 30..280) - solid black line -->
+          <polyline points="30,142 60,141 90,140 120,138 150,135 180,90 210,70 240,62 270,62 280,64"
+                    fill="none" stroke="#111111" stroke-width="2"/>
+          <!-- markers on actual last point -->
+          <circle cx="280" cy="64" r="3" fill="#111111"/>
+          <!-- forecast area from x=280..470 -->
+          <path d="M280 64 L340 62 L400 62 L470 88 L470 150 L280 150 Z" fill="url(#hatch)" opacity=".35"/>
+          <polyline points="280,64 340,62 400,62 470,88" fill="none" stroke="#5F6D7C" stroke-width="1.5" stroke-dasharray="3 2"/>
+
+          <!-- x axis ticks -->
+          <g font-family="JetBrains Mono" font-size="9" fill="#8A96A3">
+            <text x="30"  y="170" text-anchor="middle">00</text>
+            <text x="130" y="170" text-anchor="middle">06</text>
+            <text x="230" y="170" text-anchor="middle">10</text>
+            <text x="280" y="170" text-anchor="middle" fill="#111">14</text>
+            <text x="380" y="170" text-anchor="middle">18</text>
+            <text x="470" y="170" text-anchor="middle">24</text>
+          </g>
+          <line x1="280" y1="25" x2="280" y2="155" stroke="#D8DEE5" stroke-dasharray="2 3"/>
+          <text x="285" y="30" font-family="Inter" font-size="10" fill="#5F6D7C">Сейчас →</text>
+        </svg>
+      </div>
+    </section>
+
+    <div class="approve-bar" style="position:sticky;bottom:20px;background:var(--ink-900);color:#fff;padding:16px 22px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow-lg);margin-top:48px">
+      <div><b style="font-weight:600">Шаг 2 готов к рассмотрению.</b> <span style="color:var(--ink-300);font-size:13px;margin-left:12px">Подтвердите UI Kit или укажите правки перед Шагом 3 (План редизайна страниц).</span></div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--ink-400)">02 / 04</div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

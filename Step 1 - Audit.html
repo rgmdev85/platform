@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Шаг 1 · Аудит референсов и легаси — ЕАЕ:Платформа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand-red:#EC0033;
+    --brand-red-hover:#C4002B;
+    --ink-900:#0F1720;
+    --ink-800:#1B2530;
+    --ink-700:#2B3843;
+    --ink-600:#455260;
+    --ink-500:#5F6D7C;
+    --ink-400:#8A96A3;
+    --ink-300:#B6BEC8;
+    --ink-200:#D8DEE5;
+    --ink-100:#EAEEF2;
+    --ink-050:#F5F7FA;
+    --paper:#FFFFFF;
+    --sidebar:#222D31;
+    --success:#2E8540;
+    --warning:#B26A00;
+    --danger:#C0392B;
+    --info:#1F6FEB;
+    --ibcs-actual:#111111;
+    --ibcs-plan:#8A96A3;
+    --ibcs-prev:#B6BEC8;
+    --ibcs-forecast:#5F6D7C;
+    --variance-pos:#2E8540;
+    --variance-neg:#C0392B;
+    --variance-neu:#8A96A3;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color:var(--ink-800);
+    background:var(--ink-050);
+    line-height:1.55;
+    font-size:15px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .shell{max-width:1180px;margin:0 auto;padding:56px 40px 96px}
+  header.doc-head{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    padding-bottom:28px;border-bottom:1px solid var(--ink-200);
+    margin-bottom:40px;gap:32px;
+  }
+  .doc-head .meta{color:var(--ink-500);font-size:13px;letter-spacing:.04em;text-transform:uppercase;font-weight:500;margin-bottom:10px}
+  .doc-head h1{
+    font-size:38px;line-height:1.15;font-weight:700;margin:0 0 8px;
+    color:var(--ink-900);letter-spacing:-.01em;
+  }
+  .doc-head .subtitle{color:var(--ink-500);font-size:16px;max-width:640px}
+  .doc-head .brandmark{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 14px;border:1px solid var(--ink-200);border-radius:6px;
+    background:var(--paper);white-space:nowrap;
+  }
+  .brandmark img{width:28px;height:28px;object-fit:contain}
+  .brandmark b{font-weight:700;color:var(--ink-900)}
+  .brandmark span{color:var(--ink-500);font-size:13px}
+
+  section{margin-bottom:56px}
+  section h2{
+    font-size:22px;font-weight:700;color:var(--ink-900);
+    margin:0 0 6px;letter-spacing:-.005em;
+    display:flex;align-items:baseline;gap:12px;
+  }
+  section h2 .num{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;
+    color:var(--brand-red);letter-spacing:0;
+  }
+  section h2 + p.lede{color:var(--ink-500);margin:0 0 24px;font-size:15px;max-width:760px}
+  h3{font-size:15px;font-weight:600;margin:24px 0 12px;color:var(--ink-900);letter-spacing:.005em}
+
+  /* generic card */
+  .card{
+    background:var(--paper);border:1px solid var(--ink-200);
+    border-radius:8px;padding:20px 22px;
+  }
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  @media (max-width:900px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}}
+
+  /* palette */
+  .swatch{
+    display:flex;flex-direction:column;
+    background:var(--paper);border:1px solid var(--ink-200);border-radius:8px;
+    overflow:hidden;font-size:12px;
+  }
+  .swatch .chip{height:76px;border-bottom:1px solid var(--ink-200)}
+  .swatch .info{padding:10px 12px}
+  .swatch .label{font-weight:600;color:var(--ink-900);font-size:13px}
+  .swatch .hex{font-family:'JetBrains Mono',monospace;color:var(--ink-500);font-size:12px;margin-top:2px}
+  .swatch .use{color:var(--ink-500);font-size:11px;margin-top:6px;line-height:1.4}
+
+  /* type specimen */
+  .type-row{
+    display:grid;grid-template-columns:160px 90px 1fr;gap:16px;
+    padding:14px 0;border-bottom:1px solid var(--ink-100);align-items:baseline;
+  }
+  .type-row:last-child{border-bottom:none}
+  .type-tag{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brand-red);text-transform:uppercase;letter-spacing:.06em}
+  .type-spec{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-500)}
+  .type-sample{color:var(--ink-900)}
+
+  /* inventory table */
+  table.inv{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--paper);border:1px solid var(--ink-200);border-radius:8px;overflow:hidden}
+  table.inv th{
+    text-align:left;font-weight:600;color:var(--ink-600);
+    padding:12px 14px;background:var(--ink-050);
+    border-bottom:1px solid var(--ink-200);font-size:12px;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  table.inv td{padding:12px 14px;border-bottom:1px solid var(--ink-100);vertical-align:top}
+  table.inv tr:last-child td{border-bottom:none}
+  table.inv td.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink-700)}
+  .tag{
+    display:inline-block;padding:2px 8px;border-radius:4px;
+    font-size:11px;font-weight:600;letter-spacing:.03em;
+    font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  }
+  .tag.keep{background:#E7F3EA;color:var(--success)}
+  .tag.fix{background:#FDEBE7;color:var(--danger)}
+  .tag.improve{background:#FFF3E0;color:var(--warning)}
+  .tag.add{background:#E7EEFD;color:var(--info)}
+
+  /* principle cards */
+  .principle{
+    display:flex;gap:14px;padding:14px 16px;
+    border:1px solid var(--ink-200);border-radius:6px;background:var(--paper);
+  }
+  .principle .num-badge{
+    flex:0 0 32px;height:32px;border-radius:6px;background:var(--ink-050);
+    color:var(--brand-red);font-family:'JetBrains Mono',monospace;font-weight:600;
+    display:flex;align-items:center;justify-content:center;font-size:13px;
+  }
+  .principle .body strong{display:block;color:var(--ink-900);font-size:14px;margin-bottom:2px}
+  .principle .body span{color:var(--ink-500);font-size:13px;line-height:1.5}
+
+  /* legacy findings row */
+  .finding{
+    display:grid;grid-template-columns:24px 1fr;gap:12px;padding:10px 0;
+    border-bottom:1px dashed var(--ink-200);
+  }
+  .finding:last-child{border-bottom:none}
+  .finding .mark{
+    width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px;
+  }
+  .finding .mark.neg{background:var(--danger)}
+  .finding .mark.pos{background:var(--success)}
+  .finding .txt{font-size:14px;color:var(--ink-700);line-height:1.55}
+  .finding .txt b{color:var(--ink-900)}
+
+  /* IBCS variance demo */
+  .chart-demo{
+    background:var(--paper);border:1px solid var(--ink-200);border-radius:8px;
+    padding:18px 20px;font-family:'Inter',sans-serif;
+  }
+  .chart-demo .title-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px}
+  .chart-demo .title{font-weight:600;font-size:14px;color:var(--ink-900)}
+  .chart-demo .subtitle{font-size:12px;color:var(--ink-500);font-family:'JetBrains Mono',monospace}
+  .bar-row{display:grid;grid-template-columns:60px 1fr 80px 60px;gap:12px;align-items:center;padding:6px 0;font-size:12.5px}
+  .bar-row .lbl{color:var(--ink-700);font-weight:500}
+  .bar-track{position:relative;height:22px;background:transparent}
+  .bar-plan{position:absolute;top:0;left:0;height:100%;background:transparent;border:1.5px solid var(--ink-400);border-radius:2px}
+  .bar-actual{position:absolute;top:3px;left:0;height:16px;background:var(--ink-900);border-radius:1px}
+  .bar-val{font-family:'JetBrains Mono',monospace;color:var(--ink-900);text-align:right}
+  .bar-var{font-family:'JetBrains Mono',monospace;text-align:right;font-weight:600}
+  .bar-var.pos{color:var(--variance-pos)}
+  .bar-var.neg{color:var(--variance-neg)}
+  .bar-var.neu{color:var(--variance-neu)}
+
+  .footnote{color:var(--ink-500);font-size:12px;margin-top:12px;line-height:1.5}
+  .kbd{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    padding:1px 6px;border:1px solid var(--ink-200);border-radius:4px;
+    background:var(--ink-050);color:var(--ink-700);
+  }
+  .callout{
+    border-left:3px solid var(--brand-red);background:#FFF5F7;
+    padding:14px 18px;border-radius:0 6px 6px 0;font-size:14px;color:var(--ink-800);
+    margin-top:14px;
+  }
+  .callout b{color:var(--ink-900)}
+  .approve-bar{
+    position:sticky;bottom:20px;
+    background:var(--ink-900);color:#fff;
+    padding:16px 22px;border-radius:8px;
+    display:flex;justify-content:space-between;align-items:center;
+    box-shadow:0 8px 24px rgba(15,23,32,.2);margin-top:48px;
+  }
+  .approve-bar b{font-weight:600}
+  .approve-bar span{color:var(--ink-300);font-size:13px;margin-left:12px}
+
+  /* legacy vs new demo */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  .compare > div{border:1px solid var(--ink-200);border-radius:8px;overflow:hidden;background:var(--paper)}
+  .compare .cap{padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--ink-500);border-bottom:1px solid var(--ink-200);background:var(--ink-050)}
+  .compare .cap.legacy{color:var(--danger)}
+  .compare .cap.new{color:var(--success)}
+  .compare img{width:100%;display:block}
+  @media (max-width:900px){.compare{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="doc-head">
+    <div>
+      <div class="meta">Шаг 1 из 4 · Аналитический отчёт</div>
+      <h1>Reference &amp; Legacy Audit</h1>
+      <p class="subtitle">
+        Извлечение бренд-атрибутов из корпоративной презентации ЕАЕ:Платформа, инвентаризация UI-элементов текущей системы и формулирование визуальных принципов для модернизации на базе IBCS, Zebra BI, Tableau и эвристик Якоба Нильсена.
+      </p>
+    </div>
+    <div class="brandmark">
+      <img src="brand/eae_logo.png" alt="ЕАЕ логотип" />
+      <div>
+        <b>ЕАЕ:Платформа</b><br/>
+        <span>Диспетчерская система · Энергетика</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== 1. BRAND ===================== -->
+  <section>
+    <h2><span class="num">1.1</span> Фирменная палитра (извлечено из PDF-презентации и логотипа)</h2>
+    <p class="lede">Цвета определены пиксельным сэмплированием логотипа и обложки презентации. Ярко-красный «ЕАЕ» — единственный корпоративный акцент; всё остальное — нейтральная промышленная гамма.</p>
+
+    <div class="grid-4">
+      <div class="swatch">
+        <div class="chip" style="background:#EC0033"></div>
+        <div class="info">
+          <div class="label">Brand Red</div>
+          <div class="hex">#EC0033</div>
+          <div class="use">Логотип, шапка (легаси), CTA-акценты, активные состояния. Использовать <b>умеренно</b> — не для больших фонов данных.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#C4002B"></div>
+        <div class="info">
+          <div class="label">Red Hover / Pressed</div>
+          <div class="hex">#C4002B</div>
+          <div class="use">Затемнённый оттенок для hover/active brand-элементов.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#222D31"></div>
+        <div class="info">
+          <div class="label">Ink / Sidebar</div>
+          <div class="hex">#222D31</div>
+          <div class="use">Тёмный сайдбар из легаси — сохраняем как «фирменный» тёмный тон.</div>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background:#FFFFFF;border:1px solid var(--ink-200)"></div>
+        <div class="info">
+          <div class="label">Paper</div>
+          <div class="hex">#FFFFFF</div>
+          <div class="use">Основа для рабочих поверхностей, таблиц, форм и карточек.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Расширенная нейтральная шкала (Ink)</h3>
+    <div class="grid-4">
+      <div class="swatch"><div class="chip" style="background:#0F1720"></div><div class="info"><div class="label">ink-900</div><div class="hex">#0F1720</div><div class="use">Заголовки, критический текст, KPI-числа</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#455260"></div><div class="info"><div class="label">ink-600</div><div class="hex">#455260</div><div class="use">Основной текст (WCAG AA 8.4:1 на белом)</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#8A96A3"></div><div class="info"><div class="label">ink-400</div><div class="hex">#8A96A3</div><div class="use">Второстепенный текст, метки IBCS «План»</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#D8DEE5"></div><div class="info"><div class="label">ink-200</div><div class="hex">#D8DEE5</div><div class="use">Бордеры таблиц, разделители</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#EAEEF2"></div><div class="info"><div class="label">ink-100</div><div class="hex">#EAEEF2</div><div class="use">Zebra-полосы в таблицах, hover-фон строк</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#F5F7FA"></div><div class="info"><div class="label">ink-050</div><div class="hex">#F5F7FA</div><div class="use">Фон рабочей области, «пустое пространство»</div></div></div>
+    </div>
+
+    <h3>Семантические / статусные цвета (сдержанные, для промышленного UI)</h3>
+    <div class="grid-4">
+      <div class="swatch"><div class="chip" style="background:#2E8540"></div><div class="info"><div class="label">Success · В норме</div><div class="hex">#2E8540</div><div class="use">Блок в работе, значение в норме, положительная дельта</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#B26A00"></div><div class="info"><div class="label">Warning · Внимание</div><div class="hex">#B26A00</div><div class="use">Отклонение, требует проверки. <b>Не жёлтый</b> — тёмно-охристый для WCAG</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#C0392B"></div><div class="info"><div class="label">Danger · Авария</div><div class="hex">#C0392B</div><div class="use">Отклонение от ПБР, критическая ошибка</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#1F6FEB"></div><div class="info"><div class="label">Info</div><div class="hex">#1F6FEB</div><div class="use">Ссылки, информационные тултипы, значения ПБР на графиках</div></div></div>
+    </div>
+
+    <h3>IBCS-палитра для визуализации данных (специальная)</h3>
+    <div class="callout">
+      <b>Принцип IBCS:</b> цвет несёт смысл «сравнения», а не «различения». Actual (факт), Plan (план), Previous Year (прошлый период) и Forecast (прогноз) имеют закреплённые нотации — не оттенки.
+    </div>
+    <div class="grid-4" style="margin-top:14px">
+      <div class="swatch"><div class="chip" style="background:#111111"></div><div class="info"><div class="label">Actual (факт)</div><div class="hex">#111111 · заливка</div><div class="use">Плотный тёмный столбик</div></div></div>
+      <div class="swatch"><div class="chip" style="background:repeating-linear-gradient(45deg,#8A96A3 0 3px,#fff 3px 6px)"></div><div class="info"><div class="label">Forecast (прогноз)</div><div class="hex">штриховка</div><div class="use">Диагональная штриховка серым</div></div></div>
+      <div class="swatch"><div class="chip" style="background:transparent;border:2px solid #8A96A3"></div><div class="info"><div class="label">Plan (план/бюджет)</div><div class="hex">#8A96A3 · контур</div><div class="use">Только контур, без заливки</div></div></div>
+      <div class="swatch"><div class="chip" style="background:#B6BEC8"></div><div class="info"><div class="label">Previous year (PY)</div><div class="hex">#B6BEC8 · заливка</div><div class="use">Светло-серый плоский</div></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 2. TYPOGRAPHY ===================== -->
+  <section>
+    <h2><span class="num">1.2</span> Типографика</h2>
+    <p class="lede">
+      PDF-презентация не декларирует явных типографических гарнитур для UI. Легаси-система использует стандартные системные шрифты в мелком размере (~11–12px), что снижает читаемость. Предлагаемая пара — <b>Inter</b> (интерфейс и данные) + <b>JetBrains Mono</b> (табличные числа, ID, коды). Обе — Open Source, что созвучно позиционированию продукта («Open Source Stack, no vendor lock-in» — стр. 5 PDF).
+    </p>
+
+    <div class="card">
+      <div class="type-row">
+        <div class="type-tag">display · h1</div>
+        <div class="type-spec">32 / 700 / -1%</div>
+        <div class="type-sample" style="font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.01em">Управление телеизмерениями</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">h2</div>
+        <div class="type-spec">22 / 700</div>
+        <div class="type-sample" style="font-size:22px;font-weight:700">Блок_1 — Сводка по ПБР</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">h3 · section</div>
+        <div class="type-spec">16 / 600</div>
+        <div class="type-sample" style="font-size:16px;font-weight:600">Трёхминутная выработка</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">body</div>
+        <div class="type-spec">14 / 400 / 1.55</div>
+        <div class="type-sample" style="font-size:14px">Выгрузка сформирована 2026-08-24 10:06:03 по дате 2026-08-24. Значения телеизмерений в норме.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">label · caps</div>
+        <div class="type-spec">11 / 600 / +6%</div>
+        <div class="type-sample" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-500)">Стандарт протокола</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">kpi metric</div>
+        <div class="type-spec">Inter · 36 / 700 · tabular-nums</div>
+        <div class="type-sample" style="font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em">62.28<span style="font-size:16px;color:var(--ink-500);font-weight:500;margin-left:6px">°C</span></div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">data · mono</div>
+        <div class="type-spec">JetBrains Mono · 13 / 500</div>
+        <div class="type-sample" style="font-family:'JetBrains Mono',monospace;font-size:13px">2026-08-24 10:06:03 &nbsp; 201071 &nbsp; +12.4% &nbsp; Float</div>
+      </div>
+      <div class="type-row">
+        <div class="type-tag">table cell</div>
+        <div class="type-spec">13 / 400 · tabular-nums</div>
+        <div class="type-sample" style="font-size:13px;font-variant-numeric:tabular-nums">Блок_1 · 2024-01-01 06:51:16 · B2-температура</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Ключевое улучшение vs. легаси:</b> минимальный размер body-текста поднят с ~11px до <b>14px</b>, а числовых значений в таблицах — до <b>13px с tabular-nums</b> (моноширинные цифры). Это критично для сканирования плотных таблиц телеизмерений и соответствия WCAG AA.
+    </div>
+  </section>
+
+  <!-- ===================== 3. LEGACY AUDIT ===================== -->
+  <section>
+    <h2><span class="num">1.3</span> Аудит текущей системы — что видим</h2>
+    <p class="lede">Проанализировано 11 скриншотов: формы, таблицы, дашборд с виджетами (режимы просмотра/редактирования/добавления). Ниже — конкретные визуальные и UX-проблемы легаси и что мы <b>сохраняем 1:1</b> функционально.</p>
+
+    <div class="card">
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Слишком мелкий шрифт.</b> Тело интерфейса и таблиц на уровне 11–12px — сложно читать даже с близкого расстояния. Особенно критично на экранах телеизмерений (сотни строк).</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Огромные пустые области.</b> На формах (Добавление схемы / блока / протокола) заполнение экрана &lt;20%. Поля центрированы узкой колонкой, вокруг «мёртвое» пространство. Нарушает <b>«эстетичный и минималистичный дизайн»</b> — не в пользу минимализма, а как признак недоделанности.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Красная шапка занимает высоту ~60px</b> на 1024px экрана без функции — только логотип и пользователь. Место можно отдать глобальному поиску, breadcrumbs и быстрым действиям.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Таблицы без выравнивания чисел.</b> Столбец «ID Modbus terminal», даты, «Код качества» — левое выравнивание, пропорциональные цифры → числа «пляшут». Сравнить два значения по вертикали невозможно.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Отсутствует иерархия действий.</b> Кнопки в строках таблицы (иконки «удалить» / «шестерёнка») выглядят одинаково по весу с деструктивной и нейтральной — риск ошибки. Нет подтверждения удаления.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Панель «Настройки:» открывается справа поверх контента.</b> Это модальный оверлей, скрывающий часть графика — нарушает <b>«видимость статуса системы»</b>. Должна быть боковой drawer с уводом контента, а не поверх.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Легенда графика ПБР</b> («КЗТК · КЗ² · КЗ' · Факт · ПБР») — квадраты одинакового размера и разноцветные, без нотации IBCS. Плохо считывается «что план, что факт, что прошлый год».</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Цвета блока «ГОУ»</b> — сплошная зелёная плашка занимает ~30% экрана без градаций. Плохо показывает, где именно в норме, а где вышло за границы.</div></div>
+      <div class="finding"><span class="mark neg">×</span><div class="txt"><b>Нет обратной связи по сохранению.</b> После нажатия «Сохранить телеизмерение» неясно, ушло ли — не видно toast/alert.</div></div>
+      <div class="finding"><span class="mark pos">✓</span><div class="txt"><b>Что уже хорошо:</b> тёмный сайдбар с чёткой навигацией «Страницы / Схемы / Управление страницами»; хлебные крошки в правом верхнем углу; чёткая структура режимов дашборда (Просмотр / Редактирование / Добавление виджета).</div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 4. COMPONENT INVENTORY ===================== -->
+  <section>
+    <h2><span class="num">1.4</span> Инвентарь UI-компонентов легаси (сохраняем 1:1)</h2>
+    <p class="lede">Каждый элемент ниже <b>обязателен</b> в модернизации. Функциональность не удаляется и не скрывается. Меняется только визуальное исполнение и уровень доступности.</p>
+
+    <table class="inv">
+      <thead>
+        <tr>
+          <th style="width:200px">Компонент</th>
+          <th style="width:280px">Где встречается</th>
+          <th>Что сохраняем</th>
+          <th style="width:110px">Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Глобальная шапка</b></td><td>Все экраны</td><td>Логотип ЕАЕ, кнопка коллапса сайдбара «‹», имя администратора, badge уведомлений, кнопка настроек «⚙»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Тёмный сайдбар</b></td><td>Все экраны</td><td>Разделы «Страницы», «Схемы», «Управление страницами», активный пункт со светлым фоном, коллапс до иконок</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Заголовок страницы</b></td><td>Все экраны</td><td>H1 экрана + breadcrumbs (Home › &lt;section&gt;) в правом углу</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>Форма: Добавление схемы</b></td><td>screen 01</td><td>Поля: ID Modbus terminal, Название схемы, View в РИЛА (select), кнопка «Далее»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Форма: Добавление блока</b></td><td>screen 02</td><td>ID Modbus terminal, Название блока, «Далее»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Таблица блоков</b></td><td>screen 03</td><td>Столбцы: Имя · ID Modbus terminal · Дата создания · [удалить] [настройки]. Кнопка «+ Создать блок»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Форма: Добавление телеизмерения</b></td><td>screen 04</td><td>Аккордеон «Создать новый протокол» + Стандарт протокола (МЭК-104/…) + Имя, Адрес порта, IP сервера, Адрес станции (M2M-104 / Name Space OPC UA) + чекбокс «Использовать типовые параметры» + Протокол, Адрес телеизмерения, Имя телеизмерения, Тип сигнала (Float/…). Кнопки «Назад», «Сохранить телеизмерение»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Таблица управления телеизмерениями</b></td><td>screen 05</td><td>Кнопка «+ Создать поле измерения», столбцы: Время прихода сигнала · Блок/Схема · Имя · Тип сигнала · Код качества · [удалить] [настройки]</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Форма: Добавление протокола</b></td><td>screen 06</td><td>Имя протокола для ТМ · Протокол (select) · IP сервера · Резервный IP сервера · Адрес порта · Адрес станции. Кнопки «Назад», «Сохранить протокол»</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Таблица протоколов</b></td><td>screen 07</td><td>Кнопка «+ Создать протокол», столбцы: Протокол · Адрес станции/NS · Адрес порта · IP сервера · [удалить] [настройки]</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Дашборд «страница 1» — режим просмотра</b></td><td>screen 11</td><td>Кнопка «Редактировать», карточки блоков (Блок_1, Блок_2…) с заголовком, метаданными выгрузки, фильтром по дате, тремя графиками (ПБР / Трёхминутная выработка / Блоки ГОУ) и панелью значений (KPI · Отклонения · Лог команд)</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Режим редактирования дашборда</b></td><td>screen 10</td><td>Кнопка «Готово», кнопка «Выберите юнит», кнопка «Добавить виджет»; ×-удаление карточки блока; DnD-подразумевается</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Модалка добавления виджета</b></td><td>screen 09</td><td>Dropdown «Выберите юнит» с опциями (Схема_1, Блок_1, Блок_2…)</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Панель «Настройки» дашборда</b></td><td>screen 08</td><td>Пункты: Приём данных · Телесигнализация · Телесигналы · Блоки · Схемы · <b>Редактор мнемосхем</b> (кнопка перехода — схемы вынесены из scope)</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>Дата-пикер</b></td><td>Дашборд</td><td>Формат YYYY-MM-DD с иконкой календаря</td><td><span class="tag keep">keep</span></td></tr>
+        <tr><td><b>Кнопка «Показать данные»</b></td><td>Дашборд</td><td>Зелёная primary с иконкой ▶</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>KPI-badge</b></td><td>Дашборд</td><td>«62.28 °C» синий, «Отклонения ▾» красный, «Лог команд ▾» серый</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>График «ПБР 14 :: 40.00%»</b></td><td>Дашборд</td><td>Заголовок + легенда (КЗТК, КЗ², КЗ', Факт, ПБР), сетка 24 часа, лимитные линии</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>График «Трёхминутная выработка :: 40.00%»</b></td><td>Дашборд</td><td>Диапазон-барчарт с зоной допустимых значений</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>График «Блоки ГОУ :: 40.00%»</b></td><td>Дашборд</td><td>Зелёное поле с вертикальными индикаторами</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td><b>Пагинация / скролл таблиц</b></td><td>Управление телеизмерениями</td><td>Длинный список без пагинации (легаси)</td><td><span class="tag improve">improve</span></td></tr>
+        <tr><td class="mono">— пусто —</td><td colspan="2">Отсутствует: toast-уведомления, empty state, loading skeleton, глобальный поиск, тултипы на числах, keyboard-shortcuts, тёмная тема, expand-строка таблицы, сортировка/фильтр колонок</td><td><span class="tag add">add</span></td></tr>
+      </tbody>
+    </table>
+
+    <p class="footnote">
+      Схемы (редактор мнемосхем) — <b>исключены из scope</b> по вашему уточнению. На местах сохраняется кнопка «Редактор мнемосхем» как ссылка-переход, но экран не проектируем.
+    </p>
+  </section>
+
+  <!-- ===================== 5. PRINCIPLES ===================== -->
+  <section>
+    <h2><span class="num">1.5</span> Визуальные принципы, которые заимствуем</h2>
+
+    <h3>IBCS — SUCCESS правила для визуализации</h3>
+    <div class="grid-2">
+      <div class="principle"><div class="num-badge">S</div><div class="body"><strong>SAY · Сообщение первым</strong><span>Каждый график получает содержательный заголовок в формате «сообщение + метрика + период»: «Факт превышает ПБР на 2.4% на 10:00».</span></div></div>
+      <div class="principle"><div class="num-badge">U</div><div class="body"><strong>UNIFY · Единая нотация</strong><span>Actual = чёрный залитый · Plan = серый контур · PY = светло-серый залитый · Forecast = штриховка. Одинаково во всей системе.</span></div></div>
+      <div class="principle"><div class="num-badge">C</div><div class="body"><strong>CONDENSE · Плотность данных</strong><span>Мини-спарклайны в KPI-карточках, sparkbar в таблицах, малые кратные (small multiples) при сравнении блоков.</span></div></div>
+      <div class="principle"><div class="num-badge">C</div><div class="body"><strong>CHECK · Точность</strong><span>Значения на графиках подписаны цифрами, оси начинаются с 0 для количеств, значимость выделена цветом только при отклонении &gt; порога.</span></div></div>
+      <div class="principle"><div class="num-badge">E</div><div class="body"><strong>ENABLE · Дать возможность</strong><span>Все графики поддерживают drill-down до строки данных (см. упомянутый в PDF Drill-down, стр. 6), экспорт в CSV/PNG, hover-tooltip с точными значениями.</span></div></div>
+      <div class="principle"><div class="num-badge">S</div><div class="body"><strong>SIMPLIFY · Убрать шум</strong><span>Никаких 3D, теней, градиентов на графиках. Сетка — тонкая, светлая, только горизонтальная. Легенда — inline с линией.</span></div></div>
+      <div class="principle"><div class="num-badge">S</div><div class="body"><strong>STRUCTURE · Структура</strong><span>Дашборд разбит на строгую сетку 12 колонок. Один блок = одна карточка с фиксированным паттерном (заголовок → KPI → график → footer).</span></div></div>
+    </div>
+
+    <h3>Демо-пример: столбчатая диаграмма в стиле IBCS (Actual vs Plan + variance)</h3>
+    <div class="chart-demo">
+      <div class="title-row">
+        <div>
+          <div class="title">Мощность блоков ГОУ, МВт · Факт vs ПБР</div>
+          <div class="subtitle" style="margin-top:4px">10:00 · 24.08.2026 · превышение ПБР на трёх блоках</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <span class="lbl">Блок_1</span>
+        <div class="bar-track">
+          <div class="bar-plan" style="width:78%"></div>
+          <div class="bar-actual" style="width:82%"></div>
+        </div>
+        <span class="bar-val">164.2</span>
+        <span class="bar-var pos">▲ +5.1</span>
+      </div>
+      <div class="bar-row">
+        <span class="lbl">Блок_2</span>
+        <div class="bar-track">
+          <div class="bar-plan" style="width:65%"></div>
+          <div class="bar-actual" style="width:62%"></div>
+        </div>
+        <span class="bar-val">124.0</span>
+        <span class="bar-var neg">▼ −4.6</span>
+      </div>
+      <div class="bar-row">
+        <span class="lbl">Блок_3</span>
+        <div class="bar-track">
+          <div class="bar-plan" style="width:70%"></div>
+          <div class="bar-actual" style="width:71%"></div>
+        </div>
+        <span class="bar-val">142.1</span>
+        <span class="bar-var neu">▬ +0.7</span>
+      </div>
+      <div class="bar-row">
+        <span class="lbl">Блок_4</span>
+        <div class="bar-track">
+          <div class="bar-plan" style="width:88%"></div>
+          <div class="bar-actual" style="width:96%"></div>
+        </div>
+        <span class="bar-val">192.0</span>
+        <span class="bar-var pos">▲ +9.1</span>
+      </div>
+      <p class="footnote">Чёрные бары — <b>Факт</b>, серые контуры — <b>План (ПБР)</b>. Отклонения в цвете <b>только когда превышен порог ±3%</b> — иначе нейтральный серый. Это ключевой Zebra BI-принцип «variance highlighting».</p>
+    </div>
+
+    <h3>Zebra BI — Variance highlighting и Small Multiples</h3>
+    <div class="grid-3">
+      <div class="principle"><div class="num-badge">V</div><div class="body"><strong>Variance-first</strong><span>Всегда показывать дельту рядом с абсолютным значением. Формат: «164.2 МВт ▲ +5.1». Красный/зелёный <b>только для дельт</b>, не для основного значения.</span></div></div>
+      <div class="principle"><div class="num-badge">◫</div><div class="body"><strong>Small Multiples</strong><span>Несколько блоков сравниваются одинаковыми маленькими графиками в сетке 2×N. Тот же масштаб осей во всех.</span></div></div>
+      <div class="principle"><div class="num-badge">≡</div><div class="body"><strong>Business-first labels</strong><span>«Блок 1: Факт превышает план на 5.1 МВт (3.1%)» — не «Series A: 164.2, Series B: 159.1».</span></div></div>
+    </div>
+
+    <h3>Tableau — гибкая работа с данными</h3>
+    <div class="grid-3">
+      <div class="principle"><div class="num-badge">◐</div><div class="body"><strong>Filter shelves</strong><span>Горизонтальная панель активных фильтров вверху таблиц/дашборда с чипами и «Сбросить всё».</span></div></div>
+      <div class="principle"><div class="num-badge">↓</div><div class="body"><strong>Drill-down</strong><span>Клик на бар в графике → раскрывается таблица первичных телеизмерений за этот интервал.</span></div></div>
+      <div class="principle"><div class="num-badge">◉</div><div class="body"><strong>Rich tooltip</strong><span>Наведение на точку графика → карточка с датой/временем, точным значением, качеством сигнала, источником (протокол/адрес).</span></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 6. NIELSEN ===================== -->
+  <section>
+    <h2><span class="num">1.6</span> Эвристики Якоба Нильсена — применимо к нашему случаю</h2>
+    <p class="lede">Ниже — 10 эвристик Нильсена с конкретной привязкой к ЕАЕ:Платформа. Для админа-инженера особенно важны №7 (гибкость + эффективность) и №8 (минимализм в дашборде).</p>
+
+    <div class="grid-2">
+      <div class="principle"><div class="num-badge">1</div><div class="body"><strong>Visibility of system status</strong><span>Toast после сохранения формы. Индикатор «last update» рядом с каждым графиком (реальное время). Skeleton при загрузке таблиц. Badge на кнопке «Отклонения» с числом активных.</span></div></div>
+      <div class="principle"><div class="num-badge">2</div><div class="body"><strong>Match to real world</strong><span>Все термины сохраняем в терминологии инженера-энергетика: «ПБР», «УДГ/УДГК», «блок ГОУ», «Modbus terminal», «телеизмерение», «код качества».</span></div></div>
+      <div class="principle"><div class="num-badge">3</div><div class="body"><strong>User control &amp; freedom</strong><span>Кнопка «Назад» на всех формах. Отмена удаления через confirm-dialog + Undo-toast на 5 секунд.</span></div></div>
+      <div class="principle"><div class="num-badge">4</div><div class="body"><strong>Consistency &amp; standards</strong><span>Одна структура для всех форм добавления. Одинаковые иконки для одинаковых действий. Единая палитра для одинаковых состояний.</span></div></div>
+      <div class="principle"><div class="num-badge">5</div><div class="body"><strong>Error prevention</strong><span>Валидация полей в реальном времени: IP-адрес по маске, порт 1–65535, обязательные поля с маркером *. Дизейбл «Сохранить» пока форма невалидна.</span></div></div>
+      <div class="principle"><div class="num-badge">6</div><div class="body"><strong>Recognition rather than recall</strong><span>Названия протоколов в select с подсказкой формата (например: «Modbus TCP — порт по умолчанию 502»). Recent items в дропдаунах.</span></div></div>
+      <div class="principle"><div class="num-badge">7</div><div class="body"><strong>Flexibility &amp; efficiency (эксперты)</strong><span>Клавиатурные шорткаты: <span class="kbd">Ctrl+K</span> — поиск, <span class="kbd">N</span> — новый протокол/блок, <span class="kbd">/</span> — фильтр в таблице. Bulk-действия чекбоксами в таблицах.</span></div></div>
+      <div class="principle"><div class="num-badge">8</div><div class="body"><strong>Aesthetic &amp; minimalist</strong><span>Убираем декоративные элементы, работаем только с данными. Больше воздуха в формах — но не пустые экраны, как в легаси, а <b>структурированное</b> размещение полей.</span></div></div>
+      <div class="principle"><div class="num-badge">9</div><div class="body"><strong>Recognize &amp; recover from errors</strong><span>Ошибки формы показываются inline у поля с описанием причины + подсказкой исправления, не в скрытом toast'e.</span></div></div>
+      <div class="principle"><div class="num-badge">10</div><div class="body"><strong>Help &amp; documentation</strong><span>Инлайн-подсказки «?» рядом со специфическими полями (например, «Адрес станции (M2M-104)» — тултип «Диапазон 1–65535, для МЭК-104 обычно 1»).</span></div></div>
+    </div>
+
+    <div class="callout" style="margin-top:24px">
+      <b>Jakob's Law:</b> админ ЕАЕ ежедневно работает с 1С, Bitrix24, Grafana, Superset, Bitrix — заимствуем оттуда конвенции: серый sidebar в стиле Grafana/Metabase, таблицы в стиле Superset, filter chips в стиле Tableau/Airtable, breadcrumbs в стиле ERP-систем 1С.
+    </div>
+  </section>
+
+  <!-- ===================== 7. WHAT'S NEXT ===================== -->
+  <section>
+    <h2><span class="num">1.7</span> Что дальше — Шаг 2</h2>
+    <p class="lede">После вашего подтверждения этого аудита я перехожу к <b>Шагу 2: UI Kit</b> — производственный CSS с design-токенами (color, type, spacing, radius, shadow) + все компоненты во всех состояниях (buttons, inputs, selects, checkboxes, radios, toggles, date pickers, tables, cards, modals, tooltips, alerts, badges, tabs, pagination, breadcrumbs, sidebar, top nav, loading/empty/error states) + отдельная секция data-viz компонентов (KPI cards, IBCS bar charts, variance charts, sparklines, comparison tables). Всё будет в одном HTML-файле-showroom.</p>
+  </section>
+
+  <div class="approve-bar">
+    <div><b>Шаг 1 готов к рассмотрению.</b> <span>Подтвердите палитру, типографику и полноту инвентаря — или укажите правки перед Шагом 2.</span></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-300)">01 / 04</div>
+  </div>
+
+</div>
+</body>
+</html>
