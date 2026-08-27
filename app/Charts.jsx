@@ -1,7 +1,7 @@
 // SVG-графики для дашборда: PBR line, three-min bars, GOU status.
 
 // ============ PBR (24-hour multi-line chart) ============
-function PBRChart({ pbr, height = 260 }) {
+function PBRChart({ pbr, height = 260, visible = { udgk: true, udg: true, fact: true, pbr: true } }) {
   const W = 900, H = height, PAD_L = 40, PAD_R = 20, PAD_T = 30, PAD_B = 30;
   const plotW = W - PAD_L - PAD_R;
   const plotH = H - PAD_T - PAD_B;
@@ -42,18 +42,18 @@ function PBRChart({ pbr, height = 260 }) {
       {/* baseline */}
       <line x1={PAD_L} y1={PAD_T + plotH} x2={W - PAD_R} y2={PAD_T + plotH} stroke="#455260" strokeWidth="1.2"/>
 
-      {/* Limit lines (УДГКЭ / УДГ) */}
-      <path d={buildLine(pbr.kztk)} fill="none" stroke="var(--line-kztk)"  strokeWidth="1.2" strokeDasharray="2 2" opacity=".7"/>
-      <path d={buildLine(pbr.kzs)}  fill="none" stroke="var(--line-kzs)"   strokeWidth="1.2" strokeDasharray="2 2" opacity=".7"/>
+      {/* Limit lines (УДГК / УДГ) */}
+      {visible.udgk && <path d={buildLine(pbr.kztk)} fill="none" stroke="var(--line-kztk)"  strokeWidth="1.2" strokeDasharray="2 2" opacity=".7"/>}
+      {visible.udg  && <path d={buildLine(pbr.kzs)}  fill="none" stroke="var(--line-kzs)"   strokeWidth="1.2" strokeDasharray="2 2" opacity=".7"/>}
 
       {/* Plan (ПБР) */}
-      <path d={buildLine(pbr.plan)} fill="none" stroke="var(--line-plan)" strokeWidth="1.8" strokeDasharray="4 3"/>
+      {visible.pbr  && <path d={buildLine(pbr.plan)} fill="none" stroke="var(--line-plan)" strokeWidth="1.8" strokeDasharray="4 3"/>}
 
       {/* Fact (bold) */}
-      <path d={buildLine(pbr.fact)} fill="none" stroke="var(--line-fact)" strokeWidth="2.2"/>
+      {visible.fact && <path d={buildLine(pbr.fact)} fill="none" stroke="var(--line-fact)" strokeWidth="2.2"/>}
 
       {/* «Сейчас» вертикаль (последняя точка факта) */}
-      {(() => {
+      {visible.fact && (() => {
         const lastFactIdx = pbr.fact.map((v, i) => v == null ? -1 : i).filter(i => i >= 0).slice(-1)[0];
         if (lastFactIdx == null) return null;
         const h = pbr.hour[lastFactIdx];
@@ -171,4 +171,99 @@ function Sparkline({ points, color = 'var(--info)', height = 24 }) {
   );
 }
 
-Object.assign(window, { PBRChart, ThreeMinChart, GOUChart, Sparkline });
+// ============ SUPERSET CHART (обобщённый) ============
+// Простой рендер: line / bar / pie
+function SupersetChart({ chart, height = 200 }) {
+  if (!chart) return null;
+  const { type, dataset } = chart;
+
+  if (type === 'line') {
+    const W = 600, H = height, PAD = 32;
+    const xs = dataset.map(d => d.x);
+    const ys = dataset.map(d => d.y);
+    const xMin = Math.min(...xs), xMax = Math.max(...xs);
+    const yMin = Math.min(...ys) * 0.9, yMax = Math.max(...ys) * 1.05;
+    const xOf = (x) => PAD + (x - xMin) / (xMax - xMin) * (W - PAD * 2);
+    const yOf = (y) => PAD + (H - PAD * 2) - (y - yMin) / (yMax - yMin) * (H - PAD * 2);
+    const d = dataset.map((p, i) => `${i === 0 ? 'M' : 'L'}${xOf(p.x)},${yOf(p.y)}`).join(' ');
+    const area = `${d} L${xOf(xMax)},${H - PAD} L${xOf(xMin)},${H - PAD} Z`;
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height, display: 'block' }} preserveAspectRatio="xMidYMid meet">
+        {[0.25, 0.5, 0.75].map(t => (
+          <line key={t} x1={PAD} y1={PAD + (H - PAD * 2) * t} x2={W - PAD} y2={PAD + (H - PAD * 2) * t} stroke="#EAEEF2" strokeWidth="1"/>
+        ))}
+        <path d={area} fill="var(--info)" opacity=".08"/>
+        <path d={d} fill="none" stroke="var(--info)" strokeWidth="2"/>
+        {dataset.map((p, i) => (
+          <circle key={i} cx={xOf(p.x)} cy={yOf(p.y)} r="2.5" fill="var(--info)"/>
+        ))}
+      </svg>
+    );
+  }
+
+  if (type === 'bar') {
+    const W = 600, H = height, PAD = 32;
+    const max = Math.max(...dataset.map(d => d.value));
+    const barW = (W - PAD * 2) / dataset.length * 0.72;
+    const step = (W - PAD * 2) / dataset.length;
+    return (
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height, display: 'block' }} preserveAspectRatio="xMidYMid meet">
+        {[0.25, 0.5, 0.75].map(t => (
+          <line key={t} x1={PAD} y1={PAD + (H - PAD * 2) * t} x2={W - PAD} y2={PAD + (H - PAD * 2) * t} stroke="#EAEEF2" strokeWidth="1"/>
+        ))}
+        {dataset.map((d, i) => {
+          const barH = (d.value / max) * (H - PAD * 2 - 16);
+          const x = PAD + i * step + (step - barW) / 2;
+          return (
+            <g key={i}>
+              <rect x={x} y={H - PAD - barH} width={barW} height={barH} fill="var(--info)" opacity=".85"/>
+              <text x={x + barW / 2} y={H - PAD + 14} fontFamily="Inter" fontSize="10" fill="var(--ink-500)" textAnchor="middle">{d.label}</text>
+              <text x={x + barW / 2} y={H - PAD - barH - 4} fontFamily="JetBrains Mono" fontSize="10" fill="var(--ink-800)" textAnchor="middle" fontWeight="600">{d.value.toFixed(1)}</text>
+            </g>
+          );
+        })}
+      </svg>
+    );
+  }
+
+  if (type === 'pie') {
+    const W = 400, H = height, cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 24;
+    const total = dataset.reduce((s, d) => s + d.value, 0);
+    let acc = -Math.PI / 2;
+    const colors = ['var(--data-cat-1)', 'var(--data-cat-2)', 'var(--data-cat-3)', 'var(--data-cat-4)', 'var(--data-cat-5)'];
+    return (
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '60%', height, display: 'block' }} preserveAspectRatio="xMidYMid meet">
+          {dataset.map((d, i) => {
+            const angle = (d.value / total) * Math.PI * 2;
+            const x1 = cx + Math.cos(acc) * r;
+            const y1 = cy + Math.sin(acc) * r;
+            const x2 = cx + Math.cos(acc + angle) * r;
+            const y2 = cy + Math.sin(acc + angle) * r;
+            const large = angle > Math.PI ? 1 : 0;
+            const path = `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)} Z`;
+            acc += angle;
+            return <path key={i} d={path} fill={colors[i % colors.length]}/>;
+          })}
+          <circle cx={cx} cy={cy} r={r * 0.55} fill="var(--ink-000)"/>
+          <text x={cx} y={cy - 4} fontFamily="Inter" fontSize="14" fontWeight="600" fill="var(--ink-900)" textAnchor="middle">{total}</text>
+          <text x={cx} y={cy + 12} fontFamily="Inter" fontSize="10" fill="var(--ink-500)" textAnchor="middle">инцидентов</text>
+        </svg>
+        <div style={{ flex: 1, fontSize: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {dataset.map((d, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontVariantNumeric: 'tabular-nums' }}>
+              <span style={{ width: 10, height: 10, background: colors[i % colors.length], borderRadius: 2, flexShrink: 0 }}/>
+              <span style={{ flex: 1, color: 'var(--ink-700)' }}>{d.label}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-900)', fontWeight: 500 }}>{d.value}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink-500)', minWidth: 32, textAlign: 'right' }}>{((d.value / total) * 100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+Object.assign(window, { PBRChart, ThreeMinChart, GOUChart, Sparkline, SupersetChart });

@@ -2,19 +2,27 @@
 
 const { useState: uS1, useEffect: uE1 } = React;
 
+// Основные разделы навигации
 const ROUTES = [
-  { key: 'dashboard', label: 'Страница 1',              icon: 'grid',     group: 'monitoring' },
-  { key: 'schemes',   label: 'Схемы',                    icon: 'map',      group: 'monitoring', disabled: true, note: 'редактор мнемосхем' },
-  { key: 'pages',     label: 'Управление страницами',    icon: 'layout',   group: 'admin' },
-  { key: 'blocks',    label: 'Блоки',                    icon: 'database', group: 'admin' },
-  { key: 'protocols', label: 'Протоколы',                icon: 'code',     group: 'admin' },
-  { key: 'telemetry', label: 'Телеизмерения',            icon: 'activity', group: 'admin' },
+  { key: 'home',         label: 'Главная',              icon: 'home',   group: 'monitoring' },
+  { key: 'schemes-page', label: 'Схемы',                icon: 'map',    group: 'monitoring' },
+  { key: 'pages',        label: 'Управление страницами', icon: 'layout', group: 'admin' },
+];
+
+// Справочники — второй уровень (аккордеон)
+const DIRECTORIES = [
+  { key: 'protocols',    label: 'Сбор и первичная обработка данных', icon: 'radio' },
+  { key: 'telesignals',  label: 'Дискретные сигналы (ТС)', icon: 'zap' },
+  { key: 'telemetry',    label: 'Аналоговые параметры (ТИ)', icon: 'activity' },
+  { key: 'values',       label: 'Текущие параметры', icon: 'activity' },
+  { key: 'charts',       label: 'Библиотека трендов', icon: 'linechart' },
+  { key: 'schemes',      label: 'Графические формы (Мнемосхемы)', icon: 'map' },
 ];
 
 function useRouter() {
-  const [route, setRoute] = uS1(() => (location.hash.replace('#/', '') || 'dashboard'));
+  const [route, setRoute] = uS1(() => (location.hash.replace('#/', '') || 'home'));
   uE1(() => {
-    const onHash = () => setRoute(location.hash.replace('#/', '') || 'dashboard');
+    const onHash = () => setRoute(location.hash.replace('#/', '') || 'home');
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -24,18 +32,26 @@ function useRouter() {
 
 function renderIcon(name, size = 16) {
   const map = {
+    home: <IconHome size={size} />,
     grid: <IconGrid size={size} />, layout: <IconLayout size={size} />, database: <IconDatabase size={size} />,
     code: <IconCode size={size} />, activity: <IconActivity size={size} />, map: <IconMap size={size} />,
+    zap: <IconZap size={size} />, radio: <IconRadio size={size} />, linechart: <IconLineChart size={size} />,
+    external: <IconExternal size={size} />, link: <IconLink size={size} />,
   };
   return map[name] || <IconGrid size={size} />;
 }
 
 function Sidebar({ route, onNavigate }) {
+  // Аккордеон справочников — открыт, если сейчас активен один из них
+  const isDirRoute = DIRECTORIES.some(d => d.key === route);
+  const [dirOpen, setDirOpen] = uS1(isDirRoute);
+  uE1(() => { if (isDirRoute) setDirOpen(true); }, [isDirRoute]);
+
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <img src="brand/eae_logo.png" alt="ЕАЕ"/>
-        <div>ЕАЕ:Платформа</div>
+        <img src="brand/eae_logo_white.png" alt="ЕАЕ"/>
+        <div>ЕАЕ: Платформа</div>
       </div>
       <div className="sidebar__nav">
         <div className="sidebar__group">
@@ -44,13 +60,10 @@ function Sidebar({ route, onNavigate }) {
             <a
               key={r.key}
               className={`sidebar__item ${route === r.key ? 'sidebar__item--active' : ''}`}
-              onClick={(e) => { e.preventDefault(); if (!r.disabled) onNavigate(r.key); }}
-              style={r.disabled ? { opacity: .5, cursor: 'not-allowed' } : {}}
-              title={r.disabled ? r.note : undefined}
+              onClick={(e) => { e.preventDefault(); onNavigate(r.key); }}
             >
               {renderIcon(r.icon)}
               <span>{r.label}</span>
-              {r.disabled && <span className="badge" style={{ marginLeft: 'auto', background: 'rgba(255,255,255,.06)', color: 'var(--ink-400)' }}>вне scope</span>}
             </a>
           ))}
         </div>
@@ -66,6 +79,42 @@ function Sidebar({ route, onNavigate }) {
               <span>{r.label}</span>
             </a>
           ))}
+
+          {/* Раскрывающийся аккордеон справочников */}
+          <a
+            className="sidebar__item"
+            onClick={(e) => { e.preventDefault(); setDirOpen(v => !v); }}
+            aria-expanded={dirOpen}
+            style={{ userSelect: 'none' }}
+          >
+            <IconSettings size={16}/>
+            <span style={{ flex: 1 }}>Справочники</span>
+            <span style={{ display: 'inline-flex', color: 'var(--ink-400)', transition: 'transform 160ms', transform: dirOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+              <IconChevronDown size={14}/>
+            </span>
+          </a>
+          <div style={{
+            overflow: 'hidden',
+            maxHeight: dirOpen ? DIRECTORIES.length * 34 + 8 : 0,
+            transition: 'max-height 200ms ease-out',
+            marginTop: dirOpen ? 2 : 0,
+          }}>
+            {DIRECTORIES.map(d => (
+              <a
+                key={d.key}
+                className={`sidebar__item ${route === d.key ? 'sidebar__item--active' : ''}`}
+                onClick={(e) => { e.preventDefault(); onNavigate(d.key); }}
+                style={{
+                  paddingLeft: 32,
+                  fontSize: 13,
+                  color: route === d.key ? 'var(--ink-000)' : 'var(--ink-300)',
+                }}
+              >
+                {renderIcon(d.icon, 14)}
+                <span>{d.label}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
       <div className="sidebar__footer">v.4.2.0 · build 2026.08</div>
@@ -84,7 +133,7 @@ function Topbar({ breadcrumbs, onOpenSettings }) {
           <IconChevronLeft size={14} />
         </button>
         <nav className="crumbs">
-          <a onClick={(e) => { e.preventDefault(); location.hash = '#/dashboard'; }}><IconHome size={12}/></a>
+          <a onClick={(e) => { e.preventDefault(); location.hash = '#/home'; }}><IconHome size={12}/></a>
           {breadcrumbs.map((b, i) => (
             <React.Fragment key={i}>
               <span className="crumbs__sep">/</span>
@@ -112,7 +161,7 @@ function Topbar({ breadcrumbs, onOpenSettings }) {
           }
           items={[
             { header: 'Уведомления · 3 новых' },
-            { icon: <IconAlert size={14}/>, label: 'Блок_1: отклонение +5.1% в 10:00', shortcut: '2м' },
+            { icon: <IconAlert size={14}/>, label: 'Линия_1: отклонение +5.1% в 10:00', shortcut: '2м' },
             { icon: <IconWarning size={14}/>, label: 'Задержка приёма данных · МЭК-104-2', shortcut: '5м' },
             { icon: <IconCheck size={14}/>, label: 'Ежедневный отчёт сформирован', shortcut: '1ч' },
             { divider: true },
@@ -148,7 +197,6 @@ function Topbar({ breadcrumbs, onOpenSettings }) {
   );
 }
 
-// Общий layout
 function Layout({ children, breadcrumbs, onOpenSettings }) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -163,7 +211,6 @@ function Layout({ children, breadcrumbs, onOpenSettings }) {
   );
 }
 
-// Общий header страницы (заголовок + правая панель действий)
 function PageHeader({ title, description, actions }) {
   return (
     <div style={{
@@ -179,4 +226,4 @@ function PageHeader({ title, description, actions }) {
   );
 }
 
-Object.assign(window, { Sidebar, Topbar, Layout, PageHeader, useRouter, ROUTES });
+Object.assign(window, { Sidebar, Topbar, Layout, PageHeader, useRouter, ROUTES, DIRECTORIES });

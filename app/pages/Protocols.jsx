@@ -125,7 +125,7 @@ function ProtocolsPage() {
   return (
     <>
       <PageHeader
-        title="Управление протоколами"
+        title="Сбор и первичная обработка данных"
         description={`${protocols.length} активных источников данных`}
         actions={
           <>

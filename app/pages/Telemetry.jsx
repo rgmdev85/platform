@@ -185,8 +185,8 @@ function TelemetryPage() {
   return (
     <>
       <PageHeader
-        title="Управление телеизмерениями"
-        description={`${items.length} полей · live-обновление каждые 5 сек`}
+        title="Аналоговые параметры (ТИ)"
+        description={`${items.length} аналоговых параметров · live-обновление каждые 5 сек`}
         actions={
           <>
             <button className="btn btn--secondary"><IconDownload size={14}/> Экспорт CSV</button>
@@ -198,6 +198,15 @@ function TelemetryPage() {
       />
 
       <div style={{ padding: '0 32px 40px' }}>
+        <div className="alert alert--info" style={{ marginBottom: 16 }}>
+          <IconInfo size={18} className="alert__icon"/>
+          <div>
+            <div className="alert__body">
+              Телеизмерения (ТИ) выстраиваются на основе <a href="#" onClick={(e) => { e.preventDefault(); location.hash = '#/protocols'; }}><b>протоколов приёма данных</b></a> и привязываются к <a href="#" onClick={(e) => { e.preventDefault(); location.hash = '#/schemes'; }}><b>схемам</b></a> и <a href="#" onClick={(e) => { e.preventDefault(); location.hash = '#/charts'; }}><b>графикам</b></a>.
+            </div>
+          </div>
+        </div>
+
         <FilterBar
           filters={filters}
           onRemove={(i) => setFilters(f => f.filter((_, idx) => idx !== i))}

@@ -57,23 +57,40 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
-<script type="text/babel" src="app/Icons.jsx"></script>
-<script type="text/babel" src="app/mock.jsx"></script>
-<script type="text/babel" src="app/Overlays.jsx"></script>
-<script type="text/babel" src="app/Charts.jsx"></script>
-<script type="text/babel" src="app/Shell.jsx"></script>
-<script type="text/babel" src="app/pages/CRUDCommon.jsx"></script>
-<script type="text/babel" src="app/pages/Blocks.jsx"></script>
-<script type="text/babel" src="app/pages/Protocols.jsx"></script>
-<script type="text/babel" src="app/pages/Telemetry.jsx"></script>
-<script type="text/babel" src="app/pages/PagesList.jsx"></script>
-<script type="text/babel" src="app/pages/Dashboard.jsx"></script>
-<script type="text/babel" src="app/App.jsx"></script>
+<script>window.__cb = 'v2026-08-27c';</script>
+<script type="text/babel" src="app/Icons.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/mock.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/Overlays.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/Charts.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/Shell.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/CRUDCommon.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Blocks.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Protocols.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Telemetry.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Telesignals.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/PagesList.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/ChartWidget.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/ChartForm.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Dashboard.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Schemes.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Home.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/Values.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/pages/ChartsDirectory.jsx?v=2026-08-27c"></script>
+<script type="text/babel" src="app/App.jsx?v=2026-08-27c"></script>
 
 <script type="text/babel">
   // Init hash if empty
-  if (!location.hash) location.hash = '#/dashboard';
-  mount();
+  if (!location.hash) location.hash = '#/home';
+
+  // Дожидаемся, пока все babel-скрипты выполнятся (они выполняются асинхронно)
+  function waitAndMount(retries = 30) {
+    const ready = ['HomePage','DashboardPage','SchemesPage','TelesignalsPage','BlocksPage','ProtocolsPage','TelemetryPage','PagesListPage','ValuesDirectoryPage','ChartsDirectoryPage','ChartWidget','AddChartForm']
+      .every(k => typeof window[k] === 'function');
+    if (ready) { mount(); return; }
+    if (retries <= 0) { console.warn('Timeout: some pages not loaded, mounting anyway'); mount(); return; }
+    setTimeout(() => waitAndMount(retries - 1), 100);
+  }
+  waitAndMount();
 </script>
 
 </body>

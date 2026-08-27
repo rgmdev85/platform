@@ -22,7 +22,7 @@ function AddPageModal({ open, onClose, onSave }) {
     >
       <div className="form-group">
         <label className="form-label">Название страницы <span className="form-label__required">*</span></label>
-        <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Например: Диспетчерский пульт УДГК-2"/>
+        <input className="input" value={name} onChange={e => setName(e.target.value)} placeholder="Например: Производственный контур"/>
         <div className="form-help">Отображается в боковой навигации и заголовке страницы.</div>
       </div>
     </Modal>
@@ -80,7 +80,7 @@ function PagesListPage() {
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <IconLayout size={14} style={{ color: 'var(--ink-400)' }}/>
-                      <a onClick={() => location.hash = '#/dashboard'} style={{ fontWeight: 500, color: 'var(--ink-900)', cursor: 'pointer' }}>{p.name}</a>
+                      <a onClick={() => location.hash = '#/home'} style={{ fontWeight: 500, color: 'var(--ink-900)', cursor: 'pointer' }}>{p.name}</a>
                     </div>
                   </td>
                   <td>
@@ -93,7 +93,7 @@ function PagesListPage() {
                   <td>{p.author}</td>
                   <td className="mono">{p.createdAt}</td>
                   <td style={{ textAlign: 'right' }}>
-                    <button className="btn btn--ghost btn--icon btn--sm" onClick={() => location.hash = '#/dashboard'} title="Открыть"><IconEye size={14}/></button>
+                    <button className="btn btn--ghost btn--icon btn--sm" onClick={() => location.hash = '#/home'} title="Открыть"><IconEye size={14}/></button>
                     <button className="btn btn--ghost btn--icon btn--sm" onClick={() => toast.info(`Настройки: ${p.name}`)} title="Настройки"><IconSettings size={14}/></button>
                     <button className="btn btn--ghost btn--icon btn--sm" onClick={() => setDeleting(p)} title="Удалить" style={{ color: 'var(--danger)' }}><IconTrash size={14}/></button>
                   </td>
